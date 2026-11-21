@@ -1,1 +1,21 @@
-# Hạng mục khám và quy tắc chuẩn bị (Task 3)
+# Hạng mục khám dùng chung cho mọi bệnh viện, kèm quy tắc chuẩn bị (mô phỏng, chỉ để học).
+# category: kham | xet-nghiem | chan-doan-hinh-anh | tham-do-chuc-nang
+- {code: KHAM-NOI, name: Khám nội tổng quát, category: kham, prep_instruction: "", fasting_hours: 0}
+- {code: KHAM-MAT, name: Khám mắt, category: kham, prep_instruction: "Mang theo kính đang đeo (nếu có)", fasting_hours: 0}
+- {code: KHAM-RHM, name: Khám răng hàm mặt, category: kham, prep_instruction: "", fasting_hours: 0}
+- {code: KHAM-PK, name: Khám phụ khoa, category: kham, prep_instruction: "Không quan hệ tình dục, không thụt rửa âm đạo trong 48 giờ trước khám; tránh ngày hành kinh", fasting_hours: 0}
+- {code: XN-MAU, name: Tổng phân tích tế bào máu, category: xet-nghiem, prep_instruction: "", fasting_hours: 0}
+- {code: XN-DUONG, name: Đường huyết lúc đói, category: xet-nghiem, prep_instruction: "Nhịn ăn ít nhất 8 tiếng, được uống nước lọc", fasting_hours: 8}
+- {code: XN-MO, name: "Bộ mỡ máu (cholesterol, triglycerid, HDL, LDL)", category: xet-nghiem, prep_instruction: "Nhịn ăn ít nhất 8 tiếng, được uống nước lọc", fasting_hours: 8}
+- {code: XN-GAN, name: "Chức năng gan (AST, ALT, GGT)", category: xet-nghiem, prep_instruction: "Không uống rượu bia 24 giờ trước khi lấy máu", fasting_hours: 0}
+- {code: XN-THAN, name: "Chức năng thận (ure, creatinin)", category: xet-nghiem, prep_instruction: "", fasting_hours: 0}
+- {code: XN-NUOCTIEU, name: Tổng phân tích nước tiểu, category: xet-nghiem, prep_instruction: "Lấy nước tiểu giữa dòng, tốt nhất là lần đi tiểu đầu tiên buổi sáng", fasting_hours: 0}
+- {code: XN-VIEMGAN, name: Xét nghiệm viêm gan B (HBsAg), category: xet-nghiem, prep_instruction: "", fasting_hours: 0}
+- {code: PAP, name: Xét nghiệm tế bào cổ tử cung (Pap), category: xet-nghiem, prep_instruction: "Không quan hệ tình dục, không thụt rửa âm đạo trong 48 giờ trước khám; tránh ngày hành kinh", fasting_hours: 0}
+- {code: XQ-NGUC, name: Chụp X-quang ngực thẳng, category: chan-doan-hinh-anh, prep_instruction: "Không đeo trang sức, đồ kim loại; phụ nữ có thai báo trước cho nhân viên", fasting_hours: 0}
+- {code: SA-BUNG, name: Siêu âm ổ bụng tổng quát, category: chan-doan-hinh-anh, prep_instruction: "Nhịn tiểu trước khi siêu âm", fasting_hours: 6}
+- {code: SA-TIM, name: Siêu âm tim, category: chan-doan-hinh-anh, prep_instruction: "", fasting_hours: 0}
+- {code: SA-VU, name: Siêu âm tuyến vú, category: chan-doan-hinh-anh, prep_instruction: "", fasting_hours: 0}
+- {code: SA-TUYENGIAP, name: Siêu âm tuyến giáp, category: chan-doan-hinh-anh, prep_instruction: "", fasting_hours: 0}
+- {code: DIEN-TIM, name: Điện tim (ECG), category: tham-do-chuc-nang, prep_instruction: "Nghỉ ngơi, không vận động mạnh 30 phút trước khi đo", fasting_hours: 0}
+- {code: DO-LOANG-XUONG, name: Đo mật độ xương, category: tham-do-chuc-nang, prep_instruction: "", fasting_hours: 0}

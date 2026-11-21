@@ -20,7 +20,7 @@ cd backend
 copy ..\.env.example .env      # rồi điền JWT_SECRET, GUEST_COOKIE_SECRET, mật khẩu seed, GOOGLE_API_KEY
 uv sync
 uv run alembic upgrade head
-uv run python scripts/seed.py
+uv run python -m scripts.seed
 uv run uvicorn app.main:app --reload   # http://localhost:8000/docs
 
 # 3. Frontend (terminal khác)

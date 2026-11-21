@@ -1,1 +1,167 @@
-# Gói khám mô phỏng (Task 3)
+# Gói khám mô phỏng: 3 bệnh viện × 5 gói. Giá, hạng mục đều hư cấu.
+# gender_scope: any | male | female. age_max: null = không giới hạn.
+
+- code: ALP-CB01
+  hospital: ALP
+  name: Khám tổng quát cơ bản
+  description: Gói khám cơ bản cho người trưởng thành.
+  price_vnd: 1200000
+  gender_scope: any
+  age_min: 18
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, XN-MAU, XN-DUONG, XN-NUOCTIEU, XQ-NGUC, SA-BUNG]
+
+- code: ALP-TQNAM
+  hospital: ALP
+  name: Tổng quát nâng cao nam
+  description: Gói tổng quát mở rộng cho nam từ 30 tuổi.
+  price_vnd: 3500000
+  gender_scope: male
+  age_min: 30
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, KHAM-MAT, KHAM-RHM, XN-MAU, XN-DUONG, XN-MO, XN-GAN, XN-THAN, XN-NUOCTIEU, XQ-NGUC, SA-BUNG, DIEN-TIM]
+
+- code: ALP-TQNU
+  hospital: ALP
+  name: Tổng quát nâng cao nữ
+  description: Gói tổng quát mở rộng cho nữ từ 30 tuổi.
+  price_vnd: 3900000
+  gender_scope: female
+  age_min: 30
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, KHAM-MAT, KHAM-RHM, KHAM-PK, XN-MAU, XN-DUONG, XN-MO, XN-GAN, XN-THAN, XN-NUOCTIEU, XQ-NGUC, SA-BUNG, SA-VU, DIEN-TIM]
+
+- code: ALP-TIM
+  hospital: ALP
+  name: Tầm soát tim mạch
+  description: Gói tầm soát bệnh tim mạch cho người từ 40 tuổi.
+  price_vnd: 5200000
+  gender_scope: any
+  age_min: 40
+  age_max: null
+  tags: [tim-mach]
+  items: [KHAM-NOI, XN-MAU, XN-DUONG, XN-MO, DIEN-TIM, SA-TIM, XQ-NGUC]
+
+- code: ALP-CAOTUOI
+  hospital: ALP
+  name: Khám sức khỏe người cao tuổi
+  description: Gói khám cho người từ 60 tuổi.
+  price_vnd: 4800000
+  gender_scope: any
+  age_min: 60
+  age_max: null
+  tags: [cao-tuoi]
+  items: [KHAM-NOI, KHAM-MAT, XN-MAU, XN-DUONG, XN-MO, XN-GAN, XN-THAN, XN-NUOCTIEU, XQ-NGUC, SA-BUNG, DIEN-TIM, DO-LOANG-XUONG]
+
+- code: BET-CB01
+  hospital: BET
+  name: Khám tổng quát cơ bản
+  description: Gói khám cơ bản cho người trưởng thành, có khám mắt.
+  price_vnd: 1450000
+  gender_scope: any
+  age_min: 18
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, KHAM-MAT, XN-MAU, XN-DUONG, XN-NUOCTIEU, XQ-NGUC, SA-BUNG]
+
+- code: BET-TQNAM
+  hospital: BET
+  name: Tổng quát nâng cao nam
+  description: Gói tổng quát mở rộng cho nam từ 30 tuổi, có siêu âm tuyến giáp.
+  price_vnd: 3900000
+  gender_scope: male
+  age_min: 30
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, KHAM-MAT, KHAM-RHM, XN-MAU, XN-DUONG, XN-MO, XN-GAN, XN-THAN, XN-NUOCTIEU, XQ-NGUC, SA-BUNG, SA-TUYENGIAP, DIEN-TIM]
+
+- code: BET-TQNU
+  hospital: BET
+  name: Tổng quát nâng cao nữ
+  description: Gói tổng quát mở rộng cho nữ từ 30 tuổi, có xét nghiệm Pap.
+  price_vnd: 4300000
+  gender_scope: female
+  age_min: 30
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, KHAM-MAT, KHAM-RHM, KHAM-PK, PAP, XN-MAU, XN-DUONG, XN-MO, XN-GAN, XN-THAN, XN-NUOCTIEU, XQ-NGUC, SA-BUNG, SA-VU, SA-TUYENGIAP, DIEN-TIM]
+
+- code: BET-UTNU
+  hospital: BET
+  name: Tầm soát ung thư vú và cổ tử cung
+  description: Gói tầm soát ung thư phụ khoa cho nữ từ 25 tuổi.
+  price_vnd: 4200000
+  gender_scope: female
+  age_min: 25
+  age_max: null
+  tags: [ung-thu]
+  items: [KHAM-PK, PAP, SA-VU, SA-BUNG, XN-MAU]
+
+- code: BET-THN
+  hospital: BET
+  name: Khám tiền hôn nhân
+  description: Gói khám trước khi kết hôn.
+  price_vnd: 2500000
+  gender_scope: any
+  age_min: 18
+  age_max: 45
+  tags: [tien-hon-nhan]
+  items: [KHAM-NOI, XN-MAU, XN-VIEMGAN, XN-NUOCTIEU, SA-BUNG]
+
+- code: GAM-CB01
+  hospital: GAM
+  name: Khám tổng quát cơ bản
+  description: Gói khám cơ bản giá tiết kiệm.
+  price_vnd: 990000
+  gender_scope: any
+  age_min: 18
+  age_max: null
+  tags: [tong-quat]
+  items: [KHAM-NOI, XN-MAU, XN-DUONG, XQ-NGUC, SA-BUNG]
+
+- code: GAM-TIM
+  hospital: GAM
+  name: Tầm soát tim mạch
+  description: Gói tầm soát tim mạch rút gọn cho người từ 40 tuổi.
+  price_vnd: 4600000
+  gender_scope: any
+  age_min: 40
+  age_max: null
+  tags: [tim-mach]
+  items: [KHAM-NOI, XN-MO, DIEN-TIM, SA-TIM, XQ-NGUC]
+
+- code: GAM-UTNU
+  hospital: GAM
+  name: Tầm soát ung thư vú và cổ tử cung
+  description: Gói tầm soát ung thư phụ khoa cho nữ từ 25 tuổi.
+  price_vnd: 3800000
+  gender_scope: female
+  age_min: 25
+  age_max: null
+  tags: [ung-thu]
+  items: [KHAM-PK, PAP, SA-VU, XN-MAU]
+
+- code: GAM-CAOTUOI
+  hospital: GAM
+  name: Khám sức khỏe người cao tuổi
+  description: Gói khám cho người từ 60 tuổi.
+  price_vnd: 4100000
+  gender_scope: any
+  age_min: 60
+  age_max: null
+  tags: [cao-tuoi]
+  items: [KHAM-NOI, XN-MAU, XN-DUONG, XN-MO, XN-THAN, XQ-NGUC, DIEN-TIM, DO-LOANG-XUONG]
+
+- code: GAM-DN
+  hospital: GAM
+  name: Khám sức khỏe doanh nghiệp
+  description: Gói khám định kỳ cho nhân viên doanh nghiệp.
+  price_vnd: 900000
+  gender_scope: any
+  age_min: 18
+  age_max: 60
+  tags: [doanh-nghiep]
+  items: [KHAM-NOI, XN-MAU, XN-NUOCTIEU, XQ-NGUC]

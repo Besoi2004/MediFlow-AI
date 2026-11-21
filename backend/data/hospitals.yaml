@@ -1,1 +1,19 @@
-# Bệnh viện mô phỏng (Task 3)
+# Bệnh viện mô phỏng. Tên, địa chỉ, số điện thoại đều hư cấu.
+- code: ALP
+  name: Bệnh viện Alpha (mô phỏng)
+  city: Hà Nội
+  address: Số 1 Đường Mô Phỏng, Hà Nội
+  phone: "024 0000 0001"
+  description: Bệnh viện đa khoa mô phỏng, chuyên khám sức khỏe tổng quát và tim mạch.
+- code: BET
+  name: Bệnh viện Beta (mô phỏng)
+  city: TP. Hồ Chí Minh
+  address: Số 2 Đường Mô Phỏng, TP. Hồ Chí Minh
+  phone: "028 0000 0002"
+  description: Bệnh viện đa khoa mô phỏng, có gói tầm soát cho nữ và khám tiền hôn nhân.
+- code: GAM
+  name: Bệnh viện Gamma (mô phỏng)
+  city: Đà Nẵng
+  address: Số 3 Đường Mô Phỏng, Đà Nẵng
+  phone: "0236 000 0003"
+  description: Bệnh viện đa khoa mô phỏng, có gói cho người cao tuổi và doanh nghiệp.
