@@ -1,11 +1,66 @@
 """Pydantic schema cho request/response."""
-from typing import Literal
+import re
+from datetime import date
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
 from app.models import Package
 
 Gender = Literal["male", "female"]
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _normalize_email(v: str) -> str:
+    # Không dùng EmailStr: email-validator từ chối tên miền .test của tài khoản mẫu.
+    v = v.strip().lower()
+    if not _EMAIL_RE.match(v):
+        raise ValueError("Email không hợp lệ")
+    return v
+
+
+Email = Annotated[str, AfterValidator(_normalize_email)]
+
+
+class RegisterIn(BaseModel):
+    email: Email
+    password: str = Field(min_length=8, max_length=128)
+    full_name: str = Field(min_length=1, max_length=100)
+    birth_date: date
+    gender: Gender
+    phone: str = Field(pattern=r"^\+?\d{8,15}$")
+
+    @field_validator("full_name")
+    @classmethod
+    def _strip_name(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Họ tên không được để trống")
+        return v.strip()
+
+    @field_validator("birth_date")
+    @classmethod
+    def _past_birth_date(cls, v: date) -> date:
+        if v >= date.today():
+            raise ValueError("Ngày sinh phải ở trong quá khứ")
+        return v
+
+
+class LoginIn(BaseModel):
+    email: Email
+    password: str
+
+
+class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    full_name: str
+    role: Literal["customer", "consultant"]
+    birth_date: date | None
+    gender: Gender | None
+    phone: str | None
 
 
 class HospitalOut(BaseModel):

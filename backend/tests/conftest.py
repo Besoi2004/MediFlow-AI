@@ -62,6 +62,13 @@ def catalog(db) -> None:
 
 
 @pytest.fixture
+def settings_with_seed_passwords():
+    return get_settings().model_copy(
+        update={"seed_consultant_password": "tvv-test-pass", "seed_customer_password": "kh-test-pass"}
+    )
+
+
+@pytest.fixture
 def client(db) -> Iterator[TestClient]:
     def _get_db():
         yield db

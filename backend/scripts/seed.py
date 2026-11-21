@@ -11,7 +11,9 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from app.models import Hospital, Package, ServiceItem, TimeSlot
+from app.auth import hash_password, verify_password
+from app.config import Settings
+from app.models import Hospital, Package, ServiceItem, TimeSlot, User
 from app.textnorm import VN_TZ, slug_vi
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -73,14 +75,40 @@ def seed_slots(db: Session, start: date, days: int = 14) -> None:
     db.commit()
 
 
+def seed_users(db: Session, settings: Settings) -> None:
+    """1 tư vấn viên + 1 khách hàng mẫu từ biến SEED_*; bỏ qua tài khoản có mật khẩu trống."""
+    accounts = [
+        (settings.seed_consultant_email, settings.seed_consultant_password,
+         {"role": "consultant", "full_name": "Tư vấn viên mẫu"}),
+        (settings.seed_customer_email, settings.seed_customer_password,
+         {"role": "customer", "full_name": "Khách hàng mẫu", "birth_date": date(1990, 1, 1),
+          "gender": "male", "phone": "0900000000"}),
+    ]
+    for email, password, fields in accounts:
+        if not password:
+            continue
+        email = email.strip().lower()
+        user = db.scalar(select(User).where(User.email == email))
+        if user is None:
+            user = User(email=email, password_hash=hash_password(password))
+            db.add(user)
+        elif not verify_password(password, user.password_hash):
+            user.password_hash = hash_password(password)
+        for k, v in fields.items():
+            setattr(user, k, v)
+    db.commit()
+
+
 def main() -> None:
+    from app.config import get_settings
     from app.db import SessionLocal
 
     sys.stdout.reconfigure(encoding="utf-8")  # Windows: pipe mặc định cp1252, in tiếng Việt bị lỗi
     with SessionLocal() as db:
         seed_catalog(db)
         seed_slots(db, datetime.now(VN_TZ).date())
-        print("Đã seed danh mục và khung giờ 14 ngày tới.")
+        seed_users(db, get_settings())
+        print("Đã seed danh mục, khung giờ 14 ngày tới và tài khoản mẫu (nếu có mật khẩu trong .env).")
 
 
 if __name__ == "__main__":
