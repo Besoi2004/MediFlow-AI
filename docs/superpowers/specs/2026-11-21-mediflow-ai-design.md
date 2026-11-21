@@ -420,7 +420,7 @@ Các khối trong chat dùng lại component của giao diện (`PackageCard`, `
 
 **Biến môi trường chính** (`.env.example`):
 ```
-DATABASE_URL=postgresql+psycopg://mediflow:mediflow@localhost:5432/mediflow
+DATABASE_URL=postgresql+psycopg://mediflow:mediflow@127.0.0.1:5432/mediflow
 JWT_SECRET=đổi-giá-trị-này
 LLM_PROVIDER=google_genai
 LLM_MODEL=gemini-3.5-flash-lite        # kiểm tra tên chính xác trong AI Studio
