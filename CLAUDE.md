@@ -29,3 +29,4 @@ Làm xong một kế hoạch thì sửa cột trạng thái ở bảng này tron
 - URL database phải dùng `127.0.0.1`, **không** dùng `localhost`: Postgres chỉ nghe IPv4, `localhost` trên Windows thử IPv6 trước và treo khoảng 20 giây mỗi kết nối.
 - Frontend (Next.js 16): đọc `frontend/AGENTS.md` trước khi viết code Next.js; tài liệu đúng phiên bản nằm ở `frontend/node_modules/next/dist/docs/`.
 - Máy mới: xem mục "Chạy trên máy khác" trong `README.md`.
+- Đồ thị tri thức của repo nằm ở `graphify-out/`: đọc `GRAPH_REPORT.md` để nắm cấu trúc, hỏi sâu bằng `/graphify query "..."`. Làm xong mỗi kế hoạch thì chạy `/graphify --update` rồi commit lại `graphify-out/`.
