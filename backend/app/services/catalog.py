@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, contains_eager, selectinload
 
 from app.models import Hospital, Package
 from app.schemas import CompareOut, CompareRow, PackageSummary
-from app.textnorm import slug_vi
+from app.textnorm import city_key
 
 
 class CatalogError(Exception):
@@ -19,7 +19,7 @@ class CatalogError(Exception):
 def list_hospitals(db: Session, city: str | None = None) -> list[Hospital]:
     q = select(Hospital).where(Hospital.active).order_by(Hospital.name)
     if city:
-        q = q.where(Hospital.city_slug == slug_vi(city))
+        q = q.where(Hospital.city_slug == city_key(city))
     return list(db.scalars(q))
 
 
@@ -50,7 +50,7 @@ def search_packages(
     if hospital_code:
         q = q.where(Hospital.code == hospital_code.upper())
     if city:
-        q = q.where(Hospital.city_slug == slug_vi(city))
+        q = q.where(Hospital.city_slug == city_key(city))
     if tag:
         q = q.where(literal(tag) == any_(Package.tags))
     if gender:

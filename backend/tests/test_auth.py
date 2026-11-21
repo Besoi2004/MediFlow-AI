@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import select
 
 from app.auth import verify_password
@@ -55,6 +56,21 @@ def test_logout_then_me_401(client):
 def test_tampered_token_401(client):
     client.cookies.set("access_token", "khong.phai.jwt")
     assert client.get("/api/auth/me").status_code == 401
+
+
+def test_phone_with_spaces_and_dashes_accepted(client, db):
+    r = client.post("/api/auth/register", json={**NEW, "phone": "0901 234-567"})
+    assert r.status_code == 201 and r.json()["phone"] == "0901234567"
+
+
+def test_seed_users_never_promotes_existing_customer(client, db, settings_with_seed_passwords):
+    s = settings_with_seed_passwords
+    client.post("/api/auth/register", json={**NEW, "email": s.seed_consultant_email})
+    with pytest.raises(ValueError):
+        seed_users(db, s)
+    db.expire_all()
+    user = db.scalar(select(User).where(User.email == s.seed_consultant_email))
+    assert user.role == "customer" and verify_password(NEW["password"], user.password_hash)
 
 
 def test_seed_users_creates_consultant(db, settings_with_seed_passwords):

@@ -11,3 +11,20 @@ def slug_vi(text: str) -> str:
     s = unicodedata.normalize("NFD", text.lower().replace("đ", "d"))
     s = "".join(c for c in s if unicodedata.category(c) != "Mn")
     return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+_CITY_PREFIXES = ("thanh-pho-", "tp-", "tinh-")
+_CITY_ALIASES = {
+    "hcm": "ho-chi-minh", "tphcm": "ho-chi-minh", "sai-gon": "ho-chi-minh", "saigon": "ho-chi-minh",
+    "hanoi": "ha-noi", "danang": "da-nang",
+}
+
+
+def city_key(text: str) -> str:
+    """Khóa so khớp tỉnh/thành: 'TP.HCM', 'Sài Gòn', 'Thành phố Hồ Chí Minh' -> 'ho-chi-minh'."""
+    s = slug_vi(text)
+    for prefix in _CITY_PREFIXES:
+        if s.startswith(prefix):
+            s = s.removeprefix(prefix)
+            break
+    return _CITY_ALIASES.get(s, s)

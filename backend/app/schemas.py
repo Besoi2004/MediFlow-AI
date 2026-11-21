@@ -31,6 +31,11 @@ class RegisterIn(BaseModel):
     gender: Gender
     phone: str = Field(pattern=r"^\+?\d{8,15}$")
 
+    @field_validator("phone", mode="before")
+    @classmethod
+    def _compact_phone(cls, v: object) -> object:
+        return re.sub(r"[\s.\-]", "", v) if isinstance(v, str) else v
+
     @field_validator("full_name")
     @classmethod
     def _strip_name(cls, v: str) -> str:

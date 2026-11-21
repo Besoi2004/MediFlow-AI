@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.auth import COOKIE_NAME, create_access_token, hash_password
 from app.main import app
 from app.models import Booking, Hospital, Package, TimeSlot, User
-from app.services.booking import BookingError, create_booking
+from app.services.booking import BookingError, cancel_booking, create_booking
 from app.textnorm import VN_TZ
 from scripts.seed import seed_slots
 
@@ -174,6 +174,27 @@ def test_last_spot_concurrency(catalog, make_slot, engine, two_customer_ids, db)
     assert sorted(results) == ["ok", "slot_full"]
     db.expire_all()
     assert db.get(TimeSlot, slot.id).booked_count == 1
+
+
+def test_create_booking_reads_fresh_slot_under_lock(catalog, make_slot, db, engine, two_customer_ids):
+    slot = make_slot("ALP", tomorrow_at(7), capacity=2)
+    assert slot.booked_count == 0  # slot nằm sẵn trong session `db`
+    with Session(engine) as other:
+        create_booking(other, user_id=two_customer_ids[0], package_code="ALP-CB01", slot_id=slot.id)
+    create_booking(db, user_id=two_customer_ids[1], package_code="ALP-CB01", slot_id=slot.id)
+    db.expire_all()
+    assert db.get(TimeSlot, slot.id).booked_count == 2
+
+
+def test_cancel_booking_reads_fresh_status_under_lock(catalog, make_slot, db, engine, customer):
+    slot = make_slot("ALP", tomorrow_at(8), capacity=2)
+    b = create_booking(db, user_id=customer.id, package_code="ALP-CB01", slot_id=slot.id)
+    assert b.status == "booked"  # booking nằm sẵn trong session `db`
+    with Session(engine) as other:
+        cancel_booking(other, booking_id=b.id, actor=other.get(User, customer.id))
+    with pytest.raises(BookingError) as exc:
+        cancel_booking(db, booking_id=b.id, actor=customer)
+    assert exc.value.code == "already_cancelled"
 
 
 def test_cancel_rules(customer_client, other_client, consultant_client, slots, db):

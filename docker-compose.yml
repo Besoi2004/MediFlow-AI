@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: mediflow
       POSTGRES_DB: mediflow
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"  # chỉ máy này truy cập được
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

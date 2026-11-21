@@ -17,11 +17,22 @@ from app.models import Base
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
+def check_test_url(test_url: str | None, dev_url: str) -> sa.URL:
+    """Test TRUNCATE mọi bảng, nên không được trỏ vào DB dev."""
+    if not test_url:
+        raise RuntimeError("Thiếu TEST_DATABASE_URL trong backend/.env")
+    test, dev = sa.make_url(test_url), sa.make_url(dev_url)
+    if (test.host, test.port, test.database) == (dev.host, dev.port, dev.database):
+        raise RuntimeError("TEST_DATABASE_URL đang trỏ vào DB dev; test sẽ xóa sạch dữ liệu")
+    return test
+
+
 def _test_url() -> sa.URL:
-    url = get_settings().test_database_url
-    if not url:
-        pytest.exit("Thiếu TEST_DATABASE_URL trong backend/.env")
-    return sa.make_url(url)
+    s = get_settings()
+    try:
+        return check_test_url(s.test_database_url, s.database_url)
+    except RuntimeError as e:
+        pytest.exit(str(e))
 
 
 @pytest.fixture(scope="session")

@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.auth import hash_password, verify_password
 from app.config import Settings
 from app.models import Hospital, Package, ServiceItem, TimeSlot, User
-from app.textnorm import VN_TZ, slug_vi
+from app.textnorm import VN_TZ, city_key
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SLOT_HOURS = (7, 8, 9, 10)
@@ -37,7 +37,7 @@ def seed_catalog(db: Session, data_dir: Path = DATA_DIR) -> None:
     hospitals = {}
     for row in _load(data_dir, "hospitals.yaml"):
         h = _upsert(db, Hospital, row["code"])
-        h.name, h.city, h.city_slug = row["name"], row["city"], slug_vi(row["city"])
+        h.name, h.city, h.city_slug = row["name"], row["city"], city_key(row["city"])
         h.address, h.phone, h.description = row["address"], row["phone"], row["description"]
         h.active = True
         hospitals[h.code] = h
@@ -89,6 +89,10 @@ def seed_users(db: Session, settings: Settings) -> None:
             continue
         email = email.strip().lower()
         user = db.scalar(select(User).where(User.email == email))
+        if user is not None and user.role != fields["role"]:
+            # Không bao giờ đổi vai trò: ai đó có thể đã tự đăng ký trước bằng email của tư vấn viên.
+            db.rollback()
+            raise ValueError(f"Email {email} đã có tài khoản vai trò '{user.role}', seed không đổi sang '{fields['role']}'")
         if user is None:
             user = User(email=email, password_hash=hash_password(password))
             db.add(user)

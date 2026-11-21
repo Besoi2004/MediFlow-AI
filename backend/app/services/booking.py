@@ -21,6 +21,12 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
+def _lock(db: Session, model: type[TimeSlot] | type[Booking], row_id: int):
+    # populate_existing: đọc lại hàng vừa khóa, không dùng bản cũ đang nằm sẵn trong session.
+    q = select(model).where(model.id == row_id).with_for_update().execution_options(populate_existing=True)
+    return db.scalar(q)
+
+
 def _local_day_start(d: date) -> datetime:
     return datetime.combine(d, time(0), VN_TZ)
 
@@ -56,8 +62,7 @@ def create_booking(
         package = catalog.get_package(db, package_code)
         if package is None:
             raise BookingError("package_not_found")
-        # Khóa hàng khung giờ để hai người không cùng lấy chỗ cuối.
-        slot = db.scalar(select(TimeSlot).where(TimeSlot.id == slot_id).with_for_update())
+        slot = _lock(db, TimeSlot, slot_id)  # hai người không cùng lấy được chỗ cuối
         if slot is None:
             raise BookingError("slot_not_found")
         if slot.hospital_id != package.hospital_id:
@@ -93,12 +98,12 @@ def create_booking(
 
 def cancel_booking(db: Session, *, booking_id: int, actor: User) -> Booking:
     try:
-        booking = db.scalar(select(Booking).where(Booking.id == booking_id).with_for_update())
+        booking = _lock(db, Booking, booking_id)
         if booking is None or (actor.role != "consultant" and booking.user_id != actor.id):
             raise BookingError("booking_not_found")  # không cho biết lịch của người khác có tồn tại
         if booking.status == "cancelled":
             raise BookingError("already_cancelled")
-        slot = db.scalar(select(TimeSlot).where(TimeSlot.id == booking.slot_id).with_for_update())
+        slot = _lock(db, TimeSlot, booking.slot_id)
         if slot.start_at <= _now():
             raise BookingError("slot_in_past")
         slot.booked_count -= 1

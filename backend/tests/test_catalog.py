@@ -16,6 +16,15 @@ def test_city_filter_ignores_accents_and_case(client, catalog, city):  # Review 
     assert res and all(p["code"].startswith("ALP-") for p in res)
 
 
+@pytest.mark.parametrize("city,prefix", [
+    ("Hồ Chí Minh", "BET-"), ("TP.HCM", "BET-"), ("tp hcm", "BET-"), ("Thành phố Hồ Chí Minh", "BET-"),
+    ("Sài Gòn", "BET-"), ("TP. Hồ Chí Minh", "BET-"), ("Hanoi", "ALP-"), ("Thành phố Đà Nẵng", "GAM-"),
+])
+def test_city_filter_common_spellings(client, catalog, city, prefix):
+    res = client.get("/api/packages", params={"city": city}).json()
+    assert res and all(p["code"].startswith(prefix) for p in res)
+
+
 def test_hospital_list_city_filter(client, catalog):
     res = client.get("/api/hospitals", params={"city": "da nang"}).json()
     assert [h["code"] for h in res] == ["GAM"]

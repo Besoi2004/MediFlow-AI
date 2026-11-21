@@ -2,9 +2,11 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
+PLACEHOLDER_SECRET = "doi-gia-tri-nay"
 
 
 class Settings(BaseSettings):
@@ -32,6 +34,14 @@ class Settings(BaseSettings):
     seed_consultant_password: str = ""
     seed_customer_email: str = "khachhang@mediflow.test"
     seed_customer_password: str = ""
+
+    @field_validator("jwt_secret", "guest_cookie_secret")
+    @classmethod
+    def _strong_secret(cls, v: str) -> str:
+        # Secret mẫu trong .env.example là công khai: ai biết nó sẽ ký được token giả.
+        if v == PLACEHOLDER_SECRET or len(v) < 32:
+            raise ValueError("Secret phải dài ít nhất 32 ký tự và không được là giá trị mẫu")
+        return v
 
 
 @lru_cache
