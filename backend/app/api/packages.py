@@ -1,11 +1,13 @@
 """API lọc, chi tiết, so sánh gói khám và khung giờ."""
+from datetime import date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
 
 from app.db import DbSession
-from app.schemas import CompareOut, Gender, PackageDetailOut, PackageSummary
-from app.services import catalog
+from app.schemas import CompareOut, Gender, PackageDetailOut, PackageSummary, SlotOut
+from app.services import booking, catalog
+from app.textnorm import VN_TZ
 
 router = APIRouter(prefix="/packages", tags=["packages"])
 
@@ -34,6 +36,15 @@ def compare_packages(db: DbSession, codes: str):
         if e.code == "compare_count":
             raise HTTPException(400, "Chỉ so sánh được 2–3 gói") from e
         raise HTTPException(404, f"Không tìm thấy gói khám {e.detail}") from e
+
+
+@router.get("/{code}/slots", response_model=list[SlotOut])
+def package_slots(code: str, db: DbSession, date_from: date | None = None):
+    try:
+        slots = booking.list_available_slots(db, code, date_from or datetime.now(VN_TZ).date())
+    except booking.BookingError as e:
+        raise HTTPException(404, "Không tìm thấy gói khám") from e
+    return [SlotOut(id=s.id, start_at=s.start_at, remaining=s.capacity - s.booked_count) for s in slots]
 
 
 @router.get("/{code}", response_model=PackageDetailOut)

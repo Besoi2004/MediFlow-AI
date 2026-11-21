@@ -1,12 +1,13 @@
 # Hạng mục khám dùng chung cho mọi bệnh viện, kèm quy tắc chuẩn bị (mô phỏng, chỉ để học).
 # category: kham | xet-nghiem | chan-doan-hinh-anh | tham-do-chuc-nang
+# Nhịn ăn ghi bằng fasting_hours (checklist tự sinh câu "Nhịn ăn ít nhất N tiếng"), prep_instruction chỉ cho lưu ý khác.
 - {code: KHAM-NOI, name: Khám nội tổng quát, category: kham, prep_instruction: "", fasting_hours: 0}
 - {code: KHAM-MAT, name: Khám mắt, category: kham, prep_instruction: "Mang theo kính đang đeo (nếu có)", fasting_hours: 0}
 - {code: KHAM-RHM, name: Khám răng hàm mặt, category: kham, prep_instruction: "", fasting_hours: 0}
 - {code: KHAM-PK, name: Khám phụ khoa, category: kham, prep_instruction: "Không quan hệ tình dục, không thụt rửa âm đạo trong 48 giờ trước khám; tránh ngày hành kinh", fasting_hours: 0}
 - {code: XN-MAU, name: Tổng phân tích tế bào máu, category: xet-nghiem, prep_instruction: "", fasting_hours: 0}
-- {code: XN-DUONG, name: Đường huyết lúc đói, category: xet-nghiem, prep_instruction: "Nhịn ăn ít nhất 8 tiếng, được uống nước lọc", fasting_hours: 8}
-- {code: XN-MO, name: "Bộ mỡ máu (cholesterol, triglycerid, HDL, LDL)", category: xet-nghiem, prep_instruction: "Nhịn ăn ít nhất 8 tiếng, được uống nước lọc", fasting_hours: 8}
+- {code: XN-DUONG, name: Đường huyết lúc đói, category: xet-nghiem, prep_instruction: "", fasting_hours: 8}
+- {code: XN-MO, name: "Bộ mỡ máu (cholesterol, triglycerid, HDL, LDL)", category: xet-nghiem, prep_instruction: "", fasting_hours: 8}
 - {code: XN-GAN, name: "Chức năng gan (AST, ALT, GGT)", category: xet-nghiem, prep_instruction: "Không uống rượu bia 24 giờ trước khi lấy máu", fasting_hours: 0}
 - {code: XN-THAN, name: "Chức năng thận (ure, creatinin)", category: xet-nghiem, prep_instruction: "", fasting_hours: 0}
 - {code: XN-NUOCTIEU, name: Tổng phân tích nước tiểu, category: xet-nghiem, prep_instruction: "Lấy nước tiểu giữa dòng, tốt nhất là lần đi tiểu đầu tiên buổi sáng", fasting_hours: 0}

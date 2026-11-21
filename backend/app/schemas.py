@@ -1,11 +1,11 @@
 """Pydantic schema cho request/response."""
 import re
-from datetime import date
+from datetime import date, datetime
 from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
-from app.models import Package
+from app.models import Booking, Package
 
 Gender = Literal["male", "female"]
 
@@ -132,3 +132,54 @@ class CompareRow(BaseModel):
 class CompareOut(BaseModel):
     packages: list[PackageSummary]
     rows: list[CompareRow]
+
+
+class SlotOut(BaseModel):
+    id: int
+    start_at: datetime
+    remaining: int
+
+
+class BookingIn(BaseModel):
+    package_code: str
+    slot_id: int
+
+
+class BookingOut(BaseModel):
+    id: int
+    status: Literal["booked", "cancelled"]
+    channel: Literal["web", "assistant"]
+    package_code: str
+    package_name: str
+    hospital_code: str
+    hospital_name: str
+    start_at: datetime
+    price_snapshot_vnd: int
+    created_at: datetime
+
+    @classmethod
+    def of(cls, b: Booking) -> "BookingOut":
+        return cls(
+            id=b.id, status=b.status, channel=b.channel,
+            package_code=b.package.code, package_name=b.package.name,
+            hospital_code=b.package.hospital.code, hospital_name=b.package.hospital.name,
+            start_at=b.slot.start_at, price_snapshot_vnd=b.price_snapshot_vnd, created_at=b.created_at,
+        )
+
+
+class ConsultantBookingOut(BookingOut):
+    customer_name: str
+    customer_phone: str | None
+    customer_email: str
+
+    @classmethod
+    def of(cls, b: Booking) -> "ConsultantBookingOut":
+        return cls(
+            **BookingOut.of(b).model_dump(),
+            customer_name=b.user.full_name, customer_phone=b.user.phone, customer_email=b.user.email,
+        )
+
+
+class ChecklistItem(BaseModel):
+    text: str
+    items: list[str]
