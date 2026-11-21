@@ -515,3 +515,17 @@ Builder tự chọn những thứ sau:
 10. Deploy: Vercel + Render + Neon. Xem lại free tier lúc deploy. Không dùng Supabase (free tier tạm dừng project sau 1 tuần ít hoạt động; auth đã làm ở FastAPI) và không dùng Cloudflare (Vercel/Render đã có HTTPS + CDN).
 11. Giới hạn 50 tin nhắn/người/ngày.
 12. Làm giao diện đặt khám (Giai đoạn 3) trước agent (Giai đoạn 4), để luôn có app chạy được.
+
+## 18. Kết quả Giai đoạn 0 (chạy thử Gemini, 2026-11-21)
+
+- **Model đã chốt:** chat `gemini-3.5-flash-lite`; embedding `gemini-embedding-2` với `EMBEDDING_DIM=768`. Cả hai có trong danh sách model của key, và embedding trả đúng vector 768 chiều.
+- **Gọi tool tiếng Việt:** đúng 5/5 (`scripts/spike_llm.py`), tham số hợp lý:
+  - `age=35`, `gender=male`, `purpose=tong-quat`, `city="Hà Nội"`;
+  - `budget_max=5000000`;
+  - câu chào thì không gọi tool.
+- **Rút JSON:** đúng `age=28`, `gender=female`, `budget_max=4000000` (hiểu "4 củ").
+- **Quyết định:** giữ Flash-Lite và kiến trúc một vòng LLM ⇄ tools. Không cần chuyển sang 3.8 Flash hay luồng nhiều bước cố định.
+- **Lưu ý cho Kế hoạch 4:**
+  - **Ngày hôm nay:** model không biết hôm nay là ngày nào (với "sáng thứ 7" nó tự đoán `date_from=2024-05-01`). System prompt phải ghi ngày hôm nay theo giờ VN, hoặc tool tự hiểu khi `date_from` trống.
+  - **Kiểu tham số:** `purpose` khi rút JSON trả chữ tự do ("tầm soát ung thư"). Tham số `purpose`/`tag` của tool phải là `Literal` các tag cố định.
+  - **Nội dung tin nhắn:** Gemini 3.x trả nội dung kèm `extras.signature`. Phải giữ nguyên message trong state, không tự dựng lại.
