@@ -284,7 +284,7 @@ Expected: test PASS; script seed chạy xong không lỗi trên DB dev.
 
 ```powershell
 git add backend
-git commit -m "feat(backend): dữ liệu mô phỏng 3 bệnh viện, 16 gói, khung giờ và script seed"
+git commit -m "feat: dữ liệu mô phỏng và script seed"
 ```
 
 ---

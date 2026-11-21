@@ -37,3 +37,17 @@ uv run pytest
 ```
 
 Test chạy trên database `mediflow_test` trong Postgres của Docker (tự tạo nếu chưa có), nên cần `docker compose up -d` trước.
+
+## Chạy trên máy khác
+
+File `backend/.env` không nằm trong git, nên trên máy mới phải tạo lại.
+
+1. Cài Git, Docker Desktop, Node 22, uv (`winget install --id=astral-sh.uv -e` trên Windows, hoặc xem trang của uv).
+2. `git clone https://github.com/Besoi2004/MediFlow-AI.git` rồi `cd MediFlow-AI`.
+3. Tạo `backend/.env` từ `.env.example`, rồi điền:
+   - `JWT_SECRET` và `GUEST_COOKIE_SECRET`: mỗi cái một chuỗi ngẫu nhiên dài ít nhất 32 ký tự. Tạo bằng `cd backend; uv run python -c "import secrets; print(secrets.token_urlsafe(48))"`.
+   - `SEED_CONSULTANT_PASSWORD`, `SEED_CUSTOMER_PASSWORD`: mật khẩu tài khoản mẫu, tự đặt.
+   - `GOOGLE_API_KEY`: key Gemini lấy từ Google AI Studio.
+4. `docker compose up -d`, rồi làm tiếp các bước ở mục "Chạy local" (uv sync, alembic, seed).
+5. `cd backend; uv run pytest`: phải ra toàn bộ PASS trước khi làm tiếp.
+6. Xem `CLAUDE.md` để biết kế hoạch nào làm tiếp theo.

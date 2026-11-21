@@ -1,6 +1,6 @@
 # MediFlow-AI — Thiết kế (phần Cơ bản của đề VMEC-15)
 
-Ngày: 2026-11-21 · Trạng thái: chờ duyệt (bản 2: nền tảng nhiều bệnh viện)
+Ngày: 2026-11-21 · Trạng thái: đã duyệt (bản 2: nền tảng nhiều bệnh viện)
 
 ## 1. Mục đích và lý do
 
