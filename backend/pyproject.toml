@@ -34,3 +34,11 @@ package = false
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint.isort]
+# thư mục alembic/ của dự án làm ruff tưởng gói alembic là first-party
+known-third-party = ["alembic"]

@@ -1,6 +1,8 @@
 """Tạo FastAPI app và gắn các router dưới /api."""
 from fastapi import APIRouter, FastAPI
 
+from app.api import hospitals, packages
+
 app = FastAPI(title="MediFlow API")
 
 api = APIRouter(prefix="/api")
@@ -11,4 +13,6 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+api.include_router(hospitals.router)
+api.include_router(packages.router)
 app.include_router(api)

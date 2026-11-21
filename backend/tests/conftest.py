@@ -55,6 +55,13 @@ def db(engine) -> Iterator[Session]:
 
 
 @pytest.fixture
+def catalog(db) -> None:
+    from scripts.seed import DATA_DIR, seed_catalog
+
+    seed_catalog(db, DATA_DIR)
+
+
+@pytest.fixture
 def client(db) -> Iterator[TestClient]:
     def _get_db():
         yield db
