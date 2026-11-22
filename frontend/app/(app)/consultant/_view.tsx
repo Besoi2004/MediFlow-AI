@@ -13,16 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api, ApiError, type ConsultantBooking, type Hospital } from "@/lib/api";
 import { formatDateTimeVN, formatVnd } from "@/lib/format";
+import { consultantAccess } from "@/lib/nav";
 import { useApi } from "@/lib/useApi";
 
 const STATUS_ITEMS = { all: "Tất cả", booked: "Đã đặt", cancelled: "Đã hủy" };
 
 export function ConsultantView() {
-  const { user, loading } = useAuth();
+  const { user, loading, error: authError, refresh } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const isConsultant = user?.role === "consultant";
+  const access = consultantAccess({ loading, user, error: authError });
+  const isConsultant = access === "ok";
 
   const qs = new URLSearchParams(["hospital", "status", "date"].flatMap((k) => (params.get(k) ? [[k, params.get(k)!]] : []))).toString();
   const bookings = useApi<ConsultantBooking[]>(isConsultant ? `/consultant/bookings?${qs}` : null);
@@ -32,8 +34,9 @@ export function ConsultantView() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    if (bookings.error?.status === 401) router.replace(`/login?next=${encodeURIComponent(pathname + (qs ? `?${qs}` : ""))}`);
-  }, [bookings.error, router, pathname, qs]);
+    // Review Focus 2: phiên hết hạn hoặc bị từ chối (cookie còn nhưng /auth/me trả 401)
+    if (access === "login" || bookings.error?.status === 401) router.replace(`/login?next=${encodeURIComponent(pathname + (qs ? `?${qs}` : ""))}`);
+  }, [access, bookings.error, router, pathname, qs]);
 
   function setParam(key: string, value: string | null) {
     const next = new URLSearchParams(params.toString());
@@ -57,8 +60,9 @@ export function ConsultantView() {
     }
   }
 
-  if (loading) return <PageSkeleton />;
-  if (!isConsultant) return <EmptyState message="Trang này chỉ dành cho tư vấn viên." />;
+  if (access === "wait" || access === "login") return <PageSkeleton />;
+  if (access === "retry") return <ErrorState message={authError!.message} onRetry={refresh} />; // Review Focus 1
+  if (access === "forbidden") return <EmptyState message="Trang này chỉ dành cho tư vấn viên." />;
 
   const hospitalItems = { all: "Tất cả", ...Object.fromEntries((hospitals.data ?? []).map((h) => [h.code, h.name])) };
   const e = bookings.error;
@@ -94,7 +98,8 @@ export function ConsultantView() {
               <label htmlFor="c-date" className="text-sm font-medium">
                 Ngày khám
               </label>
-              <Input id="c-date" type="date" value={params.get("date") ?? ""} onChange={(ev) => setParam("date", ev.currentTarget.value || null)} />
+              {/* không điều khiển: router.replace chạy như transition, ô ngày điều khiển bị trả về giá trị cũ khi đang gõ */}
+              <Input id="c-date" type="date" defaultValue={params.get("date") ?? ""} onChange={(ev) => setParam("date", ev.currentTarget.value || null)} />
             </div>
             <div className="grid gap-1.5">
               <label htmlFor="c-status" className="text-sm font-medium">
