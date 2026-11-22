@@ -1,0 +1,81 @@
+/* CSS riêng của trang chủ: chỉ những chỗ taste-skill cho phép "page CSS" (bên trong một visual). */
+
+/* app-frame (sections-library.md, nguyên công thức) */
+.app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+.app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+.app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+.app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
+@media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+@media (max-width: 1023px) {
+  .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .app > .app__pane--list { max-height: 252px; }
+  .app > .app__pane--list::after { display: none; }
+  .app .ui-win__side { display: none; }
+  .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+  .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+}
+@media (max-width: 639px) {
+  .app.ui { grid-template-rows: minmax(0, 1fr); }
+  .app > .app__pane--list { display: none; }
+  .app > .app__pane + .app__pane { border-top: 0; }
+}
+
+/* Ba màn hình nhỏ trong phần "Đặt lịch khám trong 3 bước" và bảng so sánh: giao diện thật của MediFlow */
+.mf-win { display: grid; gap: 14px; padding: 20px; font-size: 13px; }
+.mf-win__title { font-weight: 500; font-size: 14px; }
+.mf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.mf-pkg { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 12px 0; border-top: 1px solid var(--u-line); }
+.mf-pkg b { font-weight: 500; }
+.mf-pkg small, .mf-muted { color: var(--u-muted); }
+.mf-pkg .num { grid-row: span 2; align-self: center; font-variant-numeric: tabular-nums; }
+.mf-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mf-slot { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--u-border); border-radius: 10px; }
+.mf-slot b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.mf-slot.is-on { border-color: var(--u-accent); box-shadow: inset 0 0 0 1px var(--u-accent); }
+.mf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mf-table th, .mf-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--u-line); font-weight: 400; }
+.mf-table thead th { vertical-align: top; }
+.mf-table thead b { display: block; font-weight: 500; }
+.mf-table td { font-size: 15px; }
+
+/* hero collage: nền sáng của khung tranh và thẻ nhỏ, theo khối CSS của assets/layout/hero-collage.html */
+.hero__art { background:
+    radial-gradient(70% 60% at 18% 12%, color-mix(in oklab, var(--ground-surface) 80%, white), transparent 70%),
+    radial-gradient(60% 50% at 90% 100%, color-mix(in oklab, var(--ground-bg) 80%, var(--ground-accent)), transparent 70%),
+    var(--ground-bg); }
+.hero__art > .ly-piece--note { left: var(--s-6); bottom: var(--s-6); width: 300px; z-index: 2; }
+.d-note__line { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; color: #3d4247; border-top: 1px solid rgb(0 0 0 / .06); }
+.d-note__line:first-of-type { border-top: 0; }
+.d-note__line i { width: 18px; height: 18px; border-radius: 50%; flex: none; display: grid; place-items: center; background: #e7f4ec; color: #17673f; font-style: normal; font-size: 13px; font-weight: 500; }
+.d-note__line i.warn { background: #fdf0dc; color: #8a5300; }
+.d-note__line b { font-weight: 500; color: #16181a; }
+.hero__proof { font-size: var(--t-small); color: var(--muted); }
+.ly-piece--main .d-row { grid-template-columns: 36px minmax(0, 1fr) 88px 96px; }
+.ly-piece--main .d-main { padding-right: var(--ly-cut-room); }
+@media (max-width: 639px) { .ly-piece--main .d-row { grid-template-columns: 36px minmax(0, 1fr) 96px; } }
+@media (max-width: 1023px) { .hero__art > .ly-piece--note { left: var(--s-4); bottom: var(--s-4); width: 270px; } }
+@media (max-width: 639px) {
+  .ly-piece--main .d-row { grid-template-columns: 36px minmax(0, 1fr) 76px; }
+  /* bảng so sánh trên điện thoại: hai gói đầu, đủ chỗ cho tên hạng mục */
+  .mf-table th:nth-child(4), .mf-table td:nth-child(4) { display: none; }
+  .mf-table th, .mf-table td { padding: 8px 10px; }
+}
+.mf-item { padding: 8px 0; border-top: 1px solid var(--u-line); }
+@media (max-width: 639px) {
+  /* hero trên điện thoại: hai dòng gói đầu, khung cắt ở chỗ trống chứ không cắt ngang chữ */
+  .ly-piece--main .d-tabs, .ly-piece--main .d-row:nth-child(n+3) { display: none; }
+}
+/* điện thoại: mỗi section đúng 1 hoặc 2 màn hình (layout-v4.md §2) */
+@media (max-width: 639px) {
+  #pricing .frame, #pricing .rows__name .muted { display: none; }
+  #pricing .rows__name { display: flex; align-items: center; min-height: 44px; }
+  #benh-vien .panel { --p-h: 324px; }
+  #cach-dat .mo-pc__visual > .ui { min-height: 340px; }
+  /* moment.css để section chỉ cao 1 màn hình khi đứng yên (điện thoại); giữ đúng --h: 2 của nó */
+  #cach-dat { min-height: calc(2 * 100lvh); }
+  #faq .frame--split { --ratio: 170%; }
+}
+/* máy tính bảng: hỏi đáp xếp chồng cao hơn một màn hình */
+@media (min-width: 640px) and (max-width: 1023px) { #faq { --h: 2; } }
+@media (min-width: 640px) { #pricing .rows__name .muted { display: block; } }
