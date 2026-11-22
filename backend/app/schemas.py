@@ -6,6 +6,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
 from app.models import Booking, Package
+from app.textnorm import today_vn
 
 Gender = Literal["male", "female"]
 
@@ -46,8 +47,8 @@ class RegisterIn(BaseModel):
     @field_validator("birth_date")
     @classmethod
     def _past_birth_date(cls, v: date) -> date:
-        if v >= date.today():
-            raise ValueError("Ngày sinh phải ở trong quá khứ")
+        if not date(1900, 1, 1) <= v < today_vn():
+            raise ValueError("Ngày sinh không hợp lệ")
         return v
 
 

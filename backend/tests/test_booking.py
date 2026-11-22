@@ -1,80 +1,20 @@
 import threading
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 
 import pytest
-from fastapi.testclient import TestClient
+from conftest import tomorrow_at
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.auth import COOKIE_NAME, create_access_token, hash_password
-from app.main import app
-from app.models import Booking, Hospital, Package, TimeSlot, User
+from app.models import Booking, Package, TimeSlot, User
 from app.services.booking import BookingError, cancel_booking, create_booking
-from app.textnorm import VN_TZ
+from app.textnorm import VN_TZ, today_vn
 from scripts.seed import seed_slots
-
-
-def today_vn() -> date:
-    return datetime.now(VN_TZ).date()
-
-
-def tomorrow_at(hour: int, minute: int = 0) -> datetime:
-    return datetime.combine(today_vn() + timedelta(days=1), time(hour, minute), VN_TZ)
-
-
-def _user(db, email, role="customer", phone="0900000009") -> User:
-    u = User(email=email, password_hash=hash_password("matkhau123"), role=role,
-             full_name=f"Người dùng {email}", phone=phone)
-    db.add(u)
-    db.commit()
-    return u
-
-
-def _client_for(user: User) -> TestClient:
-    c = TestClient(app)
-    c.cookies.set(COOKIE_NAME, create_access_token(user.id))
-    return c
 
 
 @pytest.fixture
 def slots(db, catalog):
     seed_slots(db, today_vn() + timedelta(days=1), days=7)
-
-
-@pytest.fixture
-def customer(db) -> User:
-    return _user(db, "a@kh.test", phone="0911111111")
-
-
-@pytest.fixture
-def customer_client(client, customer) -> TestClient:
-    return _client_for(customer)
-
-
-@pytest.fixture
-def other_client(client, db) -> TestClient:
-    return _client_for(_user(db, "b@kh.test", phone="0922222222"))
-
-
-@pytest.fixture
-def consultant_client(client, db) -> TestClient:
-    return _client_for(_user(db, "tvv@mf.test", role="consultant"))
-
-
-@pytest.fixture
-def make_slot(db):
-    def _make(hospital_code: str, start_at: datetime, capacity: int = 5, booked_count: int = 0) -> TimeSlot:
-        hid = db.scalar(select(Hospital.id).where(Hospital.code == hospital_code))
-        s = TimeSlot(hospital_id=hid, start_at=start_at, capacity=capacity, booked_count=booked_count)
-        db.add(s)
-        db.commit()
-        return s
-    return _make
-
-
-@pytest.fixture
-def two_customer_ids(db) -> tuple[int, int]:
-    return _user(db, "c1@kh.test").id, _user(db, "c2@kh.test").id
 
 
 @pytest.fixture

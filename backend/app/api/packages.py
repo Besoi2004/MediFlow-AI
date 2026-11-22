@@ -1,13 +1,14 @@
 """API lọc, chi tiết, so sánh gói khám và khung giờ."""
-from datetime import date, datetime
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import AfterValidator
 
 from app.db import DbSession
 from app.schemas import CompareOut, Gender, PackageDetailOut, PackageSummary, SlotOut
 from app.services import booking, catalog
-from app.textnorm import VN_TZ
+from app.textnorm import today_vn, within_a_year
 
 router = APIRouter(prefix="/packages", tags=["packages"])
 
@@ -39,9 +40,9 @@ def compare_packages(db: DbSession, codes: str):
 
 
 @router.get("/{code}/slots", response_model=list[SlotOut])
-def package_slots(code: str, db: DbSession, date_from: date | None = None):
+def package_slots(code: str, db: DbSession, date_from: Annotated[date | None, AfterValidator(within_a_year)] = None):
     try:
-        slots = booking.list_available_slots(db, code, date_from or datetime.now(VN_TZ).date())
+        slots = booking.list_available_slots(db, code, date_from or today_vn())
     except booking.BookingError as e:
         raise HTTPException(404, "Không tìm thấy gói khám") from e
     return [SlotOut(id=s.id, start_at=s.start_at, remaining=s.capacity - s.booked_count) for s in slots]

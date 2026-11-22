@@ -90,9 +90,11 @@ def create_booking(
     except BookingError:
         db.rollback()
         raise
-    except IntegrityError as e:  # chỉ mục uq_bookings_active chặn bản trùng
+    except IntegrityError as e:
         db.rollback()
-        raise BookingError("duplicate_booking") from e
+        if e.orig.diag.constraint_name == "uq_bookings_active":  # chỉ mục chặn bản trùng
+            raise BookingError("duplicate_booking") from e
+        raise
     return booking
 
 

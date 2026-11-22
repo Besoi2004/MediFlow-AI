@@ -1,9 +1,21 @@
 """Chuẩn hóa chữ tiếng Việt (bỏ dấu) và múi giờ Việt Nam."""
 import re
 import unicodedata
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+
+
+def today_vn() -> date:
+    return datetime.now(VN_TZ).date()
+
+
+def within_a_year(d: date | None) -> date | None:
+    """Validator cho tham số ngày: ngày quá xa làm tràn phép cộng datetime (500)."""
+    if d is not None and abs((d - today_vn()).days) > 366:
+        raise ValueError("Ngày ngoài phạm vi cho phép")
+    return d
 
 
 def normalize_vi(text: str) -> str:

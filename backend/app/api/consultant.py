@@ -3,6 +3,7 @@ from datetime import date
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import AfterValidator
 
 from app.api.bookings import raise_http
 from app.auth import require_role
@@ -10,6 +11,7 @@ from app.db import DbSession
 from app.models import User
 from app.schemas import ConsultantBookingOut
 from app.services.booking import BookingError, cancel_booking, list_bookings
+from app.textnorm import within_a_year
 
 router = APIRouter(prefix="/consultant", tags=["consultant"])
 
@@ -22,7 +24,7 @@ def all_bookings(
     db: DbSession,
     hospital: str | None = None,
     status: Literal["booked", "cancelled"] | None = None,
-    on_date: Annotated[date | None, Query(alias="date")] = None,
+    on_date: Annotated[date | None, Query(alias="date"), AfterValidator(within_a_year)] = None,
 ):
     found = list_bookings(db, hospital_code=hospital, status=status, on_date=on_date)
     return [ConsultantBookingOut.of(b) for b in found]

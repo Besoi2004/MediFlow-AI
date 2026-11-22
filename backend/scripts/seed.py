@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.auth import hash_password, verify_password
 from app.config import Settings
 from app.models import Hospital, Package, ServiceItem, TimeSlot, User
-from app.textnorm import VN_TZ, city_key
+from app.textnorm import VN_TZ, city_key, today_vn
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SLOT_HOURS = (7, 8, 9, 10)
@@ -110,7 +110,7 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")  # Windows: pipe mặc định cp1252, in tiếng Việt bị lỗi
     with SessionLocal() as db:
         seed_catalog(db)
-        seed_slots(db, datetime.now(VN_TZ).date())
+        seed_slots(db, today_vn())
         seed_users(db, get_settings())
         print("Đã seed danh mục, khung giờ 14 ngày tới và tài khoản mẫu (nếu có mật khẩu trong .env).")
 
