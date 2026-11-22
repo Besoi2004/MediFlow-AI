@@ -1,4 +1,5 @@
 import time
+import unicodedata
 from pathlib import Path
 
 import pytest
@@ -128,6 +129,51 @@ def test_every_yaml_phrase_matches_itself():
         if rule.get("all_of"):
             combo = ", ".join((group.get("phrases") or group["exact"])[0] for group in rule["all_of"])
             assert rule["id"] in {h.rule_id for h in detect(combo)}, combo
+
+
+_CORPUS = yaml.safe_load(Path(__file__).with_name("red_flag_messages.yaml").read_text(encoding="utf-8"))
+_POSITIVE = [(rule, text) for rule, texts in _CORPUS.items() if rule != "none" for text in texts]
+
+
+def _strip_marks(text: str) -> str:
+    """Bỏ dấu nhưng giữ dấu câu, như khách gõ không dấu: "Tôi khó thở, mệt" -> "Toi kho tho, met"."""
+    plain = "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
+    return plain.replace("đ", "d").replace("Đ", "D")
+
+
+@pytest.mark.parametrize("rule,text", _POSITIVE)
+def test_corpus_detected(rule, text):
+    assert rule in {h.rule_id for h in detect(text)}
+
+
+@pytest.mark.parametrize("text", _CORPUS["none"])
+def test_corpus_no_false_alarm(text):
+    assert detect(text) == []
+
+
+@pytest.mark.parametrize("rule,text", _POSITIVE)
+def test_corpus_unaccented(rule, text):
+    # cụm trong phrases phải bắt được cả khi gõ không dấu; cụm exact thì để lớp 2 (check_symptoms)
+    data = yaml.safe_load(Path(red_flags.__file__).with_name("red_flags.yaml").read_text(encoding="utf-8"))
+    exact = {normalize_vi(p) for r in data["rules"] for g in [r, *r.get("any_of", []), *r.get("all_of", [])]
+             for p in g.get("exact", [])}
+    hit = next(h for h in detect(text) if h.rule_id == rule)
+    if any(part in exact for part in hit.matched.split(" + ")):
+        pytest.skip("cụm exact")
+    assert rule in {h.rule_id for h in detect(_strip_marks(text))}, _strip_marks(text)
+
+
+def test_seed_catalog_never_flags():
+    # khách hay chép nguyên tên gói, dịch vụ vào câu hỏi: "gói Tầm soát tim mạch giá bao nhiêu"
+    def strings(x):
+        if isinstance(x, str):
+            yield x
+        for v in x.values() if isinstance(x, dict) else x if isinstance(x, list) else []:
+            yield from strings(v)
+
+    data_dir = Path(red_flags.__file__).parents[2] / "data"
+    texts = [s for f in data_dir.glob("*.yaml") for s in strings(yaml.safe_load(f.read_text(encoding="utf-8")))]
+    assert len(texts) > 100 and [t for t in texts if detect(t)] == []
 
 
 def test_long_message_is_fast():
