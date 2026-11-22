@@ -1,8 +1,12 @@
 import time
+from pathlib import Path
 
 import pytest
+import yaml
 
+from app.safety import red_flags
 from app.safety.pii import redact
+from app.safety.red_flags import detect
 
 
 @pytest.mark.parametrize("raw,expected", [
@@ -22,6 +26,9 @@ from app.safety.pii import redact
     ("Tôi tên An, muốn khám tổng quát", "Tôi tên [TÊN], muốn khám tổng quát"),
     ("mẹ tôi tên là Trần Thị Bình", "mẹ tôi tên là [TÊN]"), ("tên tôi là lan 30 tuổi", "tên tôi là [TÊN] 30 tuổi"),
     ("tôi tên hoa muốn khám", "tôi tên [TÊN] muốn khám"),
+    # tên viết thường không được nuốt triệu chứng theo sau
+    ("tôi tên lan đau ngực", "tôi tên [TÊN] đau ngực"), ("tên tôi là lan khó thở quá", "tên tôi là [TÊN] khó thở quá"),
+    ("tôi tên hoa co giật", "tôi tên [TÊN] co giật"),
     ("CMND 012345678", "CMND [CMND]"), ("số chứng minh: 012 345 678", "số chứng minh: [CMND]"),
 ])
 def test_redacts(raw, expected):
@@ -35,6 +42,16 @@ def test_redacts(raw, expected):
     "Gói này tên là gì?", "bạn tên gì vậy", "tên gói là ALP-CB01", "tên tôi là gì nhỉ"])
 def test_keeps_non_pii(text):
     assert redact(text) == text
+
+
+def test_redact_never_hides_red_flags():
+    # Kế hoạch 4 chạy detect() trên bản đã che, nên che tên không được làm mất cảnh báo nào
+    data = yaml.safe_load(Path(red_flags.__file__).with_name("red_flags.yaml").read_text(encoding="utf-8"))
+    for rule in data["rules"]:
+        for phrase in rule.get("phrases", []) + rule.get("exact", []):
+            text = f"tôi tên lan {phrase}"
+            before = {h.rule_id for h in detect(text)}
+            assert before <= {h.rule_id for h in detect(redact(text))}, text
 
 
 def test_long_text_is_fast():
