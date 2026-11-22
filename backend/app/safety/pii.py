@@ -22,8 +22,11 @@ _PATTERNS = (
 
 # Tên chỉ che khi người dùng tự giới thiệu: "tên tôi là Nguyễn Văn An", "mẹ tôi tên là Bình".
 # shortcut: tên không có từ dẫn ("Nguyễn Văn An, 35 tuổi") không che được nếu không có NER
-_NAME_CUE = re.compile(r"(?i)\b(?:tên\s+(?:tôi|mình|em|con|cháu|của\s+tôi|của\s+mình|của\s+em)"
-                       r"|(?:tôi|mình|em|con|cháu|anh|chị)\s+tên)(?:\s+là)?[ \t]+")
+_PERSON = (r"(?:tôi|mình|em|con|cháu|anh|chị|mẹ|má|bố|ba|cha|vợ|chồng|ông|bà|bé)"
+           r"(?:\s+(?:nội|ngoại|gái|trai))?(?:\s+(?:tôi|mình|em|anh|chị))?")  # "ông nội", "con gái tôi"
+_NAME_CUE = re.compile(r"(?i)\b(?:tên\s+(?:của\s+)?" + _PERSON + r"\s+là"  # "tên con tôi là": thử trước, kẻo che "tôi"
+                       r"|tên\s+(?:của\s+)?(?:tôi|mình|em|con|cháu)"  # "tên tôi Lan"
+                       r"|" + _PERSON + r"\s+tên(?:\s+là)?)[ \t]+")  # "mẹ tên là Bình", "bố tên Hùng"
 _WORD = re.compile(r"[ \t]*([^\W\d_]+)")
 _NOT_NAME = {"gì", "tuổi", "năm", "sinh", "ở", "và", "muốn", "đang", "cần", "nhé", "ạ", "nha", "thì", "mà", "nhưng",
              "làm", "đi", "đặt", "khám", "hỏi", "có", "được", "bị", "cho", "là", "nay", "hiện", "nhỉ", "vậy", "này",

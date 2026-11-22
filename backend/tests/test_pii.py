@@ -31,6 +31,11 @@ from app.safety.red_flags import detect
     ("tôi tên lan đau ngực", "tôi tên [TÊN] đau ngực"), ("tên tôi là lan khó thở quá", "tên tôi là [TÊN] khó thở quá"),
     ("tôi tên hoa co giật", "tôi tên [TÊN] co giật"),
     ("tên tôi là Tôn Nữ Thị Hoàng Bảo Anh, 30 tuổi", "tên tôi là [TÊN], 30 tuổi"),  # tên 6 chữ
+    # tên người thân: "tên con tôi là An" từng che nhầm chữ "tôi" và để lọt "An"
+    ("tên con tôi là An", "tên con tôi là [TÊN]"), ("tên mẹ tôi là Lan", "tên mẹ tôi là [TÊN]"),
+    ("tên của mẹ tôi là Lan", "tên của mẹ tôi là [TÊN]"), ("tên bố là Hùng", "tên bố là [TÊN]"),
+    ("mẹ tên là Bình", "mẹ tên là [TÊN]"), ("bố tên Hùng, 60 tuổi", "bố tên [TÊN], 60 tuổi"),
+    ("ông nội tên Sáu", "ông nội tên [TÊN]"), ("tên con Minh", "tên con [TÊN]"),
     ("CMND 012345678", "CMND [CMND]"), ("số chứng minh: 012 345 678", "số chứng minh: [CMND]"),
 ])
 def test_redacts(raw, expected):
@@ -41,7 +46,8 @@ def test_redacts(raw, expected):
     "tôi 35 tuổi", "mã gói ALP-CB01", "giá 120000000 đồng",
     "đặt lịch 05-12-2026 08:00", "ngày 05.12.2026 08:00",  # ngày kèm giờ đủ 9 chữ số sau số 0 đầu
     "ngày 05.12.2026 07.30", "2026-12-05 08:00", "giá 2.000.000 - 3.000.000", "10.000.000.000đ",  # không phải CCCD
-    "Gói này tên là gì?", "bạn tên gì vậy", "tên gói là ALP-CB01", "tên tôi là gì nhỉ"])
+    "Gói này tên là gì?", "bạn tên gì vậy", "tên gói là ALP-CB01", "tên tôi là gì nhỉ",
+    "mẹ tên gì cũng được", "bác sĩ tên gì", "tên bố mẹ ghi ở đâu"])
 def test_keeps_non_pii(text):
     assert redact(text) == text
 
