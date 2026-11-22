@@ -56,7 +56,7 @@ def test_redact_never_hides_red_flags():
     # Kế hoạch 4 chạy detect() trên bản đã che, nên che tên không được làm mất cảnh báo nào
     data = yaml.safe_load(Path(red_flags.__file__).with_name("red_flags.yaml").read_text(encoding="utf-8"))
     for rule in data["rules"]:
-        for phrase in rule.get("phrases", []) + rule.get("exact", []):
+        for phrase in [p for g in [rule, *rule.get("any_of", [])] for p in g.get("phrases", []) + g.get("exact", [])]:
             text = f"tôi tên lan {phrase}"
             before = {h.rule_id for h in detect(text)}
             assert rule["id"] in before, text  # câu thử phải thật sự có cờ đỏ, không thì test qua mà chẳng kiểm gì

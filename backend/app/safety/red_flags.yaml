@@ -71,13 +71,16 @@ rules:
   - id: tu_tu
     severity: emergency
     symptom_code: tu_tu
-    phrases: [tự sát, muốn chết, không muốn sống, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử]
+    phrases: [tự sát, không muốn sống, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử]
     exact: [tự tử]
-    # nói quá: "sợ lấy máu muốn chết", "nóng muốn chết". Không gồm "buồn", "chán", "đau" vì có thể là thật.
-    # shortcut: gõ không dấu thì vẫn báo cả câu nói quá; cố ý chấp nhận để an toàn
-    not_after: [sợ, mệt, đói, khát, nóng, lạnh, lo, ngứa, buồn cười, hồi hộp, run, ngại]
-    # dấu hiệu ý định thật: có các từ này cùng khoảng thì vẫn báo
-    still_if: [chỉ, thật sự, thực sự, rất, đến mức, tới mức, mệt mỏi, cuộc sống, cuộc đời]
+    any_of:
+      # chỉ "muốn chết" mới hay là nói quá; "mệt không muốn sống", "lo quá muốn tự tử" thì luôn báo
+      - phrases: [muốn chết]
+        # nói quá: "sợ lấy máu muốn chết", "nóng muốn chết". Không gồm "buồn", "chán", "đau" vì có thể là thật.
+        # shortcut: gõ không dấu thì vẫn báo cả câu nói quá; cố ý chấp nhận để an toàn
+        not_after: [sợ, mệt, đói, khát, nóng, lạnh, lo, ngứa, buồn cười, hồi hộp, run, ngại]
+        # dấu hiệu ý định thật: có các từ này cùng khoảng thì vẫn báo
+        still_if: [chỉ, thật sự, thực sự, rất, đến mức, tới mức, mệt mỏi, cuộc sống, cuộc đời]
 
   - id: thai_ra_mau
     severity: emergency

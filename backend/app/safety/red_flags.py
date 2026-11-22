@@ -46,7 +46,7 @@ class Rule:
     id: str
     severity: Severity
     symptom_code: str
-    pattern: Pattern
+    patterns: tuple[Pattern, ...]  # cụm chính và các nhóm any_of: khớp nhóm nào cũng được
     all_of: tuple[Pattern, ...]  # mọi nhóm cùng có mặt trong tin nhắn, không cần liền nhau
 
 
@@ -98,7 +98,8 @@ def _load(path: Path = _YAML) -> tuple[tuple[Rule, ...], dict[bool, Grammar]]:
     for r in data["rules"]:
         if r["severity"] not in get_args(Severity):  # gõ sai severity thì worst() sẽ bỏ sót cấp cứu
             raise ValueError(f"red_flags.yaml: severity lạ ở luật {r['id']}: {r['severity']}")
-        rules.append(Rule(r["id"], r["severity"], r["symptom_code"], _pattern(r, r["id"]),
+        rules.append(Rule(r["id"], r["severity"], r["symptom_code"],
+                          tuple(_pattern(g, r["id"]) for g in [r, *r.get("any_of", [])]),
                           tuple(_pattern(g, r["id"]) for g in r.get("all_of", []))))
     for key in ("id", "symptom_code"):  # trùng symptom_code thì evaluate_codes chỉ giữ một luật
         values = [r[key] for r in data["rules"]]
@@ -109,8 +110,9 @@ def _load(path: Path = _YAML) -> tuple[tuple[Rule, ...], dict[bool, Grammar]]:
 
 RULES, GRAMMAR = _load()
 SYMPTOM_CODES: tuple[str, ...] = tuple(r.symptom_code for r in RULES)
-# Khóa (id luật, nhóm): nhóm -1 là cụm chính của luật, 0, 1... là các nhóm all_of
-_PATTERNS = [((r.id, -1), r.pattern) for r in RULES] + [((r.id, k), p) for r in RULES for k, p in enumerate(r.all_of)]
+# Khóa (id luật, nhóm): nhóm -1 là cụm chính và any_of của luật, 0, 1... là các nhóm all_of
+_PATTERNS = ([((r.id, -1), p) for r in RULES for p in r.patterns]
+             + [((r.id, k), p) for r in RULES for k, p in enumerate(r.all_of)])
 
 
 def _clause_before(words: list[str], s: int, size: int) -> list[str]:
