@@ -1,7 +1,7 @@
 # Graph Report - MediFlow-AI  (2026-11-22)
 
 ## Corpus Check
-- 2 files · ~47,076 words
+- 2 files · ~47,222 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -203,7 +203,7 @@ Cohesion: 0.40
 Nodes (5): scripts, build, dev, lint, start
 
 ## Knowledge Gaps
-- **43 isolated node(s):** `mediflow-backend`, `Xử lý phủ định trong 3 token trước cụm triệu chứng`, `Spike thử Gemini (tool call tiếng Việt, JSON, embedding)`, `Tab Cảnh báo cờ đỏ của tư vấn viên`, `resolveConversation` (+38 more)
+- **43 isolated node(s):** `mediflow-backend`, `Xử lý phủ định trong 3 token trước cụm triệu chứng`, `Tab Cảnh báo cờ đỏ của tư vấn viên`, `resolveConversation`, `UrgentAlert (Gọi 115)` (+38 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 341 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -214,7 +214,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.129) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `Package` (e.g. with `PackageDetailOut` and `PackageSummary`) actually correct?**
   _`Package` has 12 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `mediflow-backend`, `Xử lý phủ định trong 3 token trước cụm triệu chứng`, `Spike thử Gemini (tool call tiếng Việt, JSON, embedding)` to the rest of the system?**
+- **What connects `mediflow-backend`, `Xử lý phủ định trong 3 token trước cụm triệu chứng`, `Tab Cảnh báo cờ đỏ của tư vấn viên` to the rest of the system?**
   _43 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `API gói khám` be split into smaller, more focused modules?**
   _Cohesion score 0.05173572228443449 - nodes in this community are weakly interconnected._
