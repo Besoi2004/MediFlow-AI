@@ -6,11 +6,16 @@ from zoneinfo import ZoneInfo
 VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 
 
-def slug_vi(text: str) -> str:
-    """'TP. Hồ Chí Minh' -> 'tp-ho-chi-minh': chữ thường, bỏ dấu, đ→d, ký tự khác chữ/số thành '-'."""
+def normalize_vi(text: str) -> str:
+    """'ĐAU NGỰC!!!' -> 'dau nguc': chữ thường, bỏ dấu, đ→d, ký tự khác chữ/số thành một dấu cách."""
     s = unicodedata.normalize("NFD", text.lower().replace("đ", "d"))
     s = "".join(c for c in s if unicodedata.category(c) != "Mn")
-    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+    return re.sub(r"[^a-z0-9]+", " ", s).strip()
+
+
+def slug_vi(text: str) -> str:
+    """'TP. Hồ Chí Minh' -> 'tp-ho-chi-minh'."""
+    return normalize_vi(text).replace(" ", "-")
 
 
 _CITY_PREFIXES = ("thanh-pho-", "tp-", "tinh-")
