@@ -9,7 +9,7 @@ Dự án tự học theo đề VMEC-15: nền tảng đặt lịch gói khám đ
 |---|---|---|
 | 1 | `docs/superpowers/plans/2026-11-21-plan-1-khoi-tao-va-backend.md` | xong |
 | 2 | `docs/superpowers/plans/2026-11-21-plan-2-loi-an-toan.md` | xong |
-| 3 | `docs/superpowers/plans/2026-11-21-plan-3-giao-dien-dat-kham.md` | chưa làm |
+| 3 | `docs/superpowers/plans/2026-11-21-plan-3-giao-dien-dat-kham.md` | xong |
 | 4 | `docs/superpowers/plans/2026-11-21-plan-4-agent.md` | chưa làm |
 | 5 | `docs/superpowers/plans/2026-11-21-plan-5-tro-ly-tren-giao-dien.md` | chưa làm |
 | 6 | `docs/superpowers/plans/2026-11-21-plan-6-deploy.md` | chưa làm |
@@ -28,5 +28,6 @@ Làm xong một kế hoạch thì sửa cột trạng thái ở bảng này tron
 - Backend: `cd backend; uv sync; uv run alembic upgrade head; uv run python -m scripts.seed; uv run pytest`.
 - URL database phải dùng `127.0.0.1`, **không** dùng `localhost`: Postgres chỉ nghe IPv4, `localhost` trên Windows thử IPv6 trước và treo khoảng 20 giây mỗi kết nối.
 - Frontend (Next.js 16): đọc `frontend/AGENTS.md` trước khi viết code Next.js; tài liệu đúng phiên bản nằm ở `frontend/node_modules/next/dist/docs/`.
+- Cấu trúc frontend (từ Kế hoạch 3): trang app nằm trong route group `frontend/app/(app)/` (layout riêng nạp Tailwind + shadcn); trang chủ `frontend/app/page.tsx` dựng theo taste-skill, nạp bộ kit nguyên văn ở `frontend/public/assets/` (không sửa các file đó) và CSS riêng `frontend/public/home.css`. Liên kết giữa trang chủ và trang app dùng `<a>` (tải lại cả trang).
 - Máy mới: xem mục "Chạy trên máy khác" trong `README.md`.
 - Đồ thị tri thức của repo nằm ở `graphify-out/`: đọc `GRAPH_REPORT.md` để nắm cấu trúc, hỏi sâu bằng `/graphify query "..."`. Làm xong mỗi kế hoạch thì chạy `/graphify --update` rồi commit lại `graphify-out/`.
