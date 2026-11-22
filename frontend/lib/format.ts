@@ -71,3 +71,10 @@ export function prepLines(items: { fasting_hours: number; prep_instruction: stri
   const fasting = hours > 0 ? [`Nhịn ăn ít nhất ${hours} tiếng trước giờ khám (được uống nước lọc)`] : [];
   return [...new Set([...fasting, ...items.map((i) => i.prep_instruction.trim()).filter(Boolean)])];
 }
+
+// Lịch hẹn của tôi: lịch còn hiệu lực sắp tới lên đầu (gần nhất trước), sau đó lịch đã qua hoặc đã hủy (mới nhất trước).
+export function orderBookings<T extends { status: string; start_at: string }>(list: T[], now = new Date()): T[] {
+  const upcoming = (b: T) => b.status === "booked" && Date.parse(b.start_at) >= now.getTime();
+  const t = (b: T) => Date.parse(b.start_at);
+  return [...list.filter(upcoming).sort((a, b) => t(a) - t(b)), ...list.filter((b) => !upcoming(b)).sort((a, b) => t(b) - t(a))];
+}

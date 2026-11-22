@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayKeyVN, formatAudience, formatDateTimeVN, formatDayVN, formatVnd, groupSlotsByDay, maxFastingHours, prepLines, toggleCode } from "./format";
+import { dayKeyVN, formatAudience, formatDateTimeVN, formatDayVN, formatVnd, groupSlotsByDay, maxFastingHours, orderBookings, prepLines, toggleCode } from "./format";
 
 describe("format", () => {
   it("formats VND", () => { expect(formatVnd(1200000)).toBe("1.200.000đ"); expect(formatVnd(990000)).toBe("990.000đ"); });
@@ -30,5 +30,11 @@ describe("format", () => {
       "Nhịn ăn ít nhất 8 tiếng trước giờ khám (được uống nước lọc)", "Mang kính", "Nhịn tiểu",
     ]);
     expect(prepLines([item(0, ""), item(0, "Mang kính")])).toEqual(["Mang kính"]);
+  });
+  it("puts upcoming booked appointments first, then the rest newest first", () => {
+    const b = (id: number, status: string, start_at: string) => ({ id, status, start_at });
+    const now = new Date("2026-11-23T00:00:00Z");
+    const list = [b(1, "booked", "2026-11-20T00:00:00Z"), b(2, "booked", "2026-11-30T00:00:00Z"), b(3, "cancelled", "2026-11-25T00:00:00Z"), b(4, "booked", "2026-11-24T00:00:00Z")];
+    expect(orderBookings(list, now).map((x) => x.id)).toEqual([4, 2, 3, 1]);
   });
 });
