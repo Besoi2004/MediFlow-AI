@@ -200,16 +200,17 @@ def _hospital_mentions(text: str) -> list[str]:
 
 
 def _unknown_hospitals(text: str, known_hospitals: set[str]) -> list[str]:
-    """Bệnh viện nhắc tới mà tên riêng (hoặc mã) không khớp bệnh viện nào; tên tỉnh thành thì bỏ qua."""
-    known = set()
-    for h in known_hospitals:
-        tokens = normalize_vi(h).split()
-        tokens = _strip_descriptors(tokens[2:] if tokens[:2] == ["benh", "vien"] else tokens)
-        known |= set(tokens[:1])
+    """Bệnh viện nhắc tới mà tên riêng không bắt đầu bằng trọn tên riêng (hoặc mã) của bệnh viện nào.
+
+    Tên riêng của bệnh viện trong danh mục lấy cùng cách với câu trả lời ("BV Alpha", "Bệnh viện Alpha (mô phỏng)"
+    -> "Alpha"), nên "Bệnh viện Hồng Đức" không lọt qua nhờ trùng chữ "Hồng" với "Hồng Ngọc". Tên tỉnh thành bỏ qua.
+    """
+    known = [normalize_vi(n).split() for h in known_hospitals for n in (_hospital_mentions(h) or [h])]
+    known += [c.split() for c in _CITIES]
     unknown = []
     for name in _hospital_mentions(text):
         tokens = normalize_vi(name).split()
-        if tokens[0] not in known and not any(tokens[:len(c.split())] == c.split() for c in _CITIES):
+        if not any(k and tokens[:len(k)] == k for k in known):
             unknown.append(name)
     return unknown
 
