@@ -1,44 +1,42 @@
 # Graph Report - MediFlow-AI  (2026-11-22)
 
 ## Corpus Check
-- 9 files · ~44,991 words
+- 9 files · ~46,359 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 789 nodes · 1508 edges · 61 communities (31 shown, 30 thin omitted)
+- 804 nodes · 1523 edges · 59 communities (29 shown, 30 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.91)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- Models và băm mật khẩu
-- Lõi an toàn: luật và nội bộ
-- Cấu hình ESLint và devDependencies
 - Service đặt lịch và test
-- Kế hoạch 3: giao diện đặt khám
-- Spec và quy tắc dự án
-- Các kế hoạch triển khai
-- Lõi an toàn: hàm công khai
-- API đặt lịch của khách
 - Models và schemas
+- Guard đầu ra
+- Cấu hình ESLint và devDependencies
+- Phát hiện cờ đỏ
+- Spec và quy tắc dự án
+- Che PII
+- Các kế hoạch triển khai
+- Fixture test (conftest)
 - Cấu hình shadcn
+- Seed và tài khoản mẫu
+- Kế hoạch 3: giao diện đặt khám
 - Cấu hình TypeScript
 - Cấu trúc red_flags.yaml
-- Service danh mục
-- Docker Postgres
+- API đăng nhập
 - Script thử Gemini
-- Router API và phân quyền
-- Cấu hình backend (.env)
-- API gói khám
+- Docker Postgres
 - Test danh mục
-- Fixture test (conftest)
+- Cấu hình backend (.env)
 - UI: Badge và Tabs
-- API bệnh viện
 - UI: Select
-- Service khung giờ và lịch hẹn
+- Cấu hình và migration
+- Xác thực và phân quyền
 - UI: Dialog
 - UI: Sheet
 - Migration đầu và test schema
-- Bảo vệ DB test
+- Schema đăng ký
 - UI: Button và Calendar
 - UI: Input
 - Icon mẫu Next.js
@@ -52,25 +50,25 @@
 1. `Package` - 27 edges
 2. `User` - 24 edges
 3. `TimeSlot` - 21 edges
-4. `Booking` - 20 edges
-5. `create_booking()` - 20 edges
-6. `detect()` - 20 edges
-7. `seed_catalog()` - 18 edges
-8. `Hospital` - 17 edges
-9. `get_settings()` - 17 edges
-10. `compilerOptions` - 16 edges
+4. `check()` - 21 edges
+5. `Booking` - 20 edges
+6. `create_booking()` - 20 edges
+7. `detect()` - 19 edges
+8. `seed_catalog()` - 18 edges
+9. `Hospital` - 17 edges
+10. `get_settings()` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `seed_slots()` --references--> `VN_TZ`  [EXTRACTED]
-  backend/scripts/seed.py → docs/superpowers/plans/2026-11-21-plan-1-khoi-tao-va-backend.md
+- `list_available_slots()` --references--> `VN_TZ`  [EXTRACTED]
+  backend/app/services/booking.py → docs/superpowers/plans/2026-11-21-plan-1-khoi-tao-va-backend.md
 - `Package as the single shared ORM record for price, eligibility, tags and items` --rationale_for--> `Package`  [EXTRACTED]
   graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md → backend/app/models.py
 - `Query: how create_booking connects Package, TimeSlot and Booking` --references--> `Package`  [EXTRACTED]
   graphify-out/memory/query_20261121_135555_6d5ba0b5_how_does_create_booking_connect_package__timeslot.md → backend/app/models.py
-- `Query: why Package bridges catalog and booking communities` --references--> `PackageSummary`  [EXTRACTED]
-  graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md → backend/app/schemas.py
-- `Query: how create_booking connects Package, TimeSlot and Booking` --references--> `Booking`  [EXTRACTED]
-  graphify-out/memory/query_20261121_135555_6d5ba0b5_how_does_create_booking_connect_package__timeslot.md → backend/app/models.py
+- `Chống đặt trùng và khóa hàng FOR UPDATE` --rationale_for--> `create_booking()`  [EXTRACTED]
+  docs/superpowers/plans/2026-11-21-plan-1-khoi-tao-va-backend.md → backend/app/services/booking.py
+- `Query: how create_booking connects Package, TimeSlot and Booking` --references--> `get_package()`  [EXTRACTED]
+  graphify-out/memory/query_20261121_135555_6d5ba0b5_how_does_create_booking_connect_package__timeslot.md → backend/app/services/catalog.py
 
 ## Import Cycles
 - None detected.
@@ -82,155 +80,147 @@
 - **Luồng đặt/hủy lịch** — backend_app_services_booking_list_available_slots, backend_app_services_booking_create_booking, backend_app_services_booking_cancel_booking, backend_app_services_prep_prep_checklist [EXTRACTED 1.00]
 - **Pipeline seed dữ liệu mô phỏng** — backend_scripts_seed_seed_catalog, backend_scripts_seed_seed_slots, backend_scripts_seed_seed_users [EXTRACTED 1.00]
 - **Ba module lõi an toàn (cờ đỏ, PII, kiểm tra đầu ra)** — backend_app_safety_red_flags_detect, backend_app_safety_pii_redact, backend_app_safety_output_guard_check [EXTRACTED 1.00]
-- **Pipeline trợ lý LangGraph an toàn** — docs_superpowers_plans_2026_11_21_plan_4_agent_langgraph_graph, docs_superpowers_plans_2026_11_21_plan_4_agent_red_flag_two_layer, docs_superpowers_plans_2026_11_21_plan_4_agent_output_guard_node, docs_superpowers_plans_2026_11_21_plan_4_agent_agent_tools [EXTRACTED 1.00]
 - **Starter template SVG assets in frontend/public** — frontend_public_file, frontend_public_globe, frontend_public_next, frontend_public_vercel, frontend_public_window [INFERRED 0.75]
 - **Luồng xử lý lỗi giao diện (api, 422, safeNext, ErrorState)** — docs_superpowers_plans_2026_11_21_plan_3_giao_dien_dat_kham_lib_api, docs_superpowers_plans_2026_11_21_plan_3_giao_dien_dat_kham_vi_422_handler, docs_superpowers_plans_2026_11_21_plan_3_giao_dien_dat_kham_lib_nav, docs_superpowers_plans_2026_11_21_plan_3_giao_dien_dat_kham_pagestate [INFERRED 0.85]
+- **Pipeline trợ lý LangGraph an toàn** — docs_superpowers_plans_2026_11_21_plan_4_agent_langgraph_graph, docs_superpowers_plans_2026_11_21_plan_4_agent_red_flag_two_layer, docs_superpowers_plans_2026_11_21_plan_4_agent_output_guard_node, docs_superpowers_plans_2026_11_21_plan_4_agent_agent_tools [EXTRACTED 1.00]
 
-## Communities (61 total, 30 thin omitted)
+## Communities (59 total, 30 thin omitted)
 
-### Community 0 - "Models và băm mật khẩu"
-Cohesion: 0.05
-Nodes (33): run_migrations_offline(), run_migrations_online(), _url(), login(), logout(), me(), register(), clear_auth_cookie() (+25 more)
-
-### Community 1 - "Lõi an toàn: luật và nội bộ"
+### Community 0 - "Service đặt lịch và test"
 Cohesion: 0.06
-Nodes (41): _after_last_connector(), _amount_patterns(), _contains(), _decimal(), _forbidden_sentences(), _grammar(), alt(), form() (+33 more)
+Nodes (51): book(), cancel(), checklist(), my_bookings(), raise_http(), all_bookings(), cancel(), Booking (+43 more)
 
-### Community 2 - "Cấu hình ESLint và devDependencies"
+### Community 1 - "Models và schemas"
+Cohesion: 0.05
+Nodes (42): hospital_detail(), list_hospitals(), compare_packages(), package_detail(), package_slots(), search_packages(), health(), Hospital (+34 more)
+
+### Community 2 - "Guard đầu ra"
+Cohesion: 0.07
+Nodes (36): _after_last_connector(), _amount_patterns(), check(), _contains(), _decimal(), find_amounts(), find_package_codes(), _forbidden_sentences() (+28 more)
+
+### Community 3 - "Cấu hình ESLint và devDependencies"
 Cohesion: 0.05
 Nodes (44): geistMono, geistSans, metadata, eslintConfig, nextConfig, dependencies, cn@^0.5.2, date-fns@^4.4.0 (+36 more)
 
-### Community 3 - "Service đặt lịch và test"
-Cohesion: 0.10
-Nodes (36): TimeSlot, cancel_booking(), create_booking(), _lock(), book(), _client_for(), consultant_client(), customer() (+28 more)
-
-### Community 4 - "Kế hoạch 3: giao diện đặt khám"
-Cohesion: 0.05
-Nodes (37): Kế hoạch 3: Giao diện đặt khám, AuthProvider / useAuth, Trang đặt lịch /book/[code], Trang danh mục (home, hospitals, packages, compare), CompareTable, Trang tư vấn viên /consultant, lib/api.ts (api(), ApiError), lib/constants.ts (DISCLAIMER, TAG_LABEL, CITY_OPTIONS) (+29 more)
+### Community 4 - "Phát hiện cờ đỏ"
+Cohesion: 0.08
+Nodes (32): _clause_before(), detect(), evaluate_codes(), Grammar, _grammar(), single_words(), Hit, _load() (+24 more)
 
 ### Community 5 - "Spec và quy tắc dự án"
 Cohesion: 0.06
 Nodes (33): CLAUDE.md project notes, User rules (simple Vietnamese commit messages, no Claude attribution, never print .env), MediFlow-AI Design Spec, Agent tools (search_packages, compare_packages, get_available_slots, prep tools), FastAPI REST API under /api, Floating AI assistant (LangGraph agent), Booking concurrency rule (SELECT FOR UPDATE), check_symptoms tool (red-flag layer 2) (+25 more)
 
-### Community 6 - "Các kế hoạch triển khai"
+### Community 6 - "Che PII"
+Cohesion: 0.08
+Nodes (24): _name_end(), redact(), _redact_names(), test_keeps_non_pii(), test_long_text_is_fast(), test_redacts(), test_redacts_several_in_one_message(), AgentState và AgentContext (+16 more)
+
+### Community 7 - "Các kế hoạch triển khai"
 Cohesion: 0.08
 Nodes (24): Implementation plans 1-6 status table (plans 1-2 done), Kế hoạch 1: Khởi tạo dự án + nền backend, Monorepo backend FastAPI + frontend Next.js, Kế hoạch 2: Lõi an toàn, Kế hoạch 4: Trợ lý AI ở backend, Kế hoạch 5: Trợ lý AI trên giao diện, lib/assistant.ts (pure logic), AssistantProvider (React context) (+16 more)
 
-### Community 7 - "Lõi an toàn: hàm công khai"
-Cohesion: 0.13
-Nodes (21): check(), find_amounts(), find_package_codes(), redact(), test_allowed_medical_wording(), test_code_check_needs_brackets_or_known_hospital(), test_compound_amounts(), test_find_amounts() (+13 more)
+### Community 8 - "Fixture test (conftest)"
+Cohesion: 0.12
+Nodes (8): get_db(), Base, ServiceItem, catalog(), client(), db(), engine(), settings_with_seed_passwords()
 
-### Community 8 - "API đặt lịch của khách"
-Cohesion: 0.14
-Nodes (11): book(), cancel(), checklist(), my_bookings(), raise_http(), all_bookings(), cancel(), Booking (+3 more)
-
-### Community 9 - "Models và schemas"
-Cohesion: 0.14
-Nodes (11): Base, Package, _pk(), BookingIn, ChecklistItem, CompareOut, ItemOut, PackageDetailOut (+3 more)
-
-### Community 10 - "Cấu hình shadcn"
+### Community 9 - "Cấu hình shadcn"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 11 - "Cấu hình TypeScript"
+### Community 10 - "Seed và tài khoản mẫu"
+Cohesion: 0.17
+Nodes (7): verify_password(), User, main(), seed_users(), test_register_sets_httponly_cookie_and_customer_role(), test_seed_users_creates_consultant(), test_seed_users_never_promotes_existing_customer()
+
+### Community 11 - "Kế hoạch 3: giao diện đặt khám"
+Cohesion: 0.11
+Nodes (18): Kế hoạch 3: Giao diện đặt khám, AuthProvider / useAuth, Trang đặt lịch /book/[code], Trang danh mục (home, hospitals, packages, compare), CompareTable, Trang tư vấn viên /consultant, lib/api.ts (api(), ApiError), lib/format.ts (formatVnd, formatDateTimeVN, toggleCode...) (+10 more)
+
+### Community 12 - "Cấu hình TypeScript"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
-### Community 12 - "Cấu trúc red_flags.yaml"
-Cohesion: 0.12
-Nodes (16): accented_negations, exact, except, phrases, connectors, coordinators, negations, not_negations (+8 more)
+### Community 13 - "Cấu trúc red_flags.yaml"
+Cohesion: 0.11
+Nodes (17): accented_negations, exact, except, phrases, connectors, coordinators, negations, not_negations (+9 more)
 
-### Community 13 - "Service danh mục"
-Cohesion: 0.21
-Nodes (10): CompareRow, _active_packages(), CatalogError, compare_packages(), get_hospital(), get_package(), list_hospitals(), search_packages() (+2 more)
+### Community 14 - "API đăng nhập"
+Cohesion: 0.20
+Nodes (8): login(), logout(), me(), register(), clear_auth_cookie(), create_access_token(), hash_password(), set_auth_cookie()
 
-### Community 14 - "Docker Postgres"
+### Community 15 - "Script thử Gemini"
+Cohesion: 0.14
+Nodes (5): get_available_slots(), Intake, main(), search_packages(), Spike thử Gemini (tool call tiếng Việt, JSON, embedding)
+
+### Community 16 - "Docker Postgres"
 Cohesion: 0.12
 Nodes (16): environment, healthcheck, image, ports, volumes, POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER (+8 more)
 
-### Community 15 - "Script thử Gemini"
-Cohesion: 0.15
-Nodes (5): get_available_slots(), Intake, main(), search_packages(), Spike thử Gemini (tool call tiếng Việt, JSON, embedding)
-
-### Community 17 - "Cấu hình backend (.env)"
-Cohesion: 0.16
-Nodes (3): Settings, get_db(), test_rejects_placeholder_or_short_secrets()
-
-### Community 18 - "API gói khám"
-Cohesion: 0.22
-Nodes (5): compare_packages(), package_detail(), package_slots(), search_packages(), SlotOut
-
-### Community 19 - "Test danh mục"
+### Community 17 - "Test danh mục"
 Cohesion: 0.16
 Nodes (4): test_city_filter_common_spellings(), test_city_filter_ignores_accents_and_case(), test_compare_errors(), test_inactive_package_hidden()
 
-### Community 20 - "Fixture test (conftest)"
-Cohesion: 0.19
-Nodes (4): catalog(), client(), db(), settings_with_seed_passwords()
+### Community 18 - "Cấu hình backend (.env)"
+Cohesion: 0.22
+Nodes (5): Settings, check_test_url(), _test_url(), test_refuses_test_db_equal_to_dev_db(), test_rejects_placeholder_or_short_secrets()
 
-### Community 21 - "UI: Badge và Tabs"
+### Community 19 - "UI: Badge và Tabs"
 Cohesion: 0.19
 Nodes (7): Badge(), badgeVariants, TabsList(), tabsListVariants, class-variance-authority@^0.7.1, class-variance-authority, cn
 
-### Community 22 - "API bệnh viện"
-Cohesion: 0.27
-Nodes (5): hospital_detail(), list_hospitals(), HospitalDetailOut, HospitalOut, PackageSummary
-
-### Community 23 - "UI: Select"
+### Community 20 - "UI: Select"
 Cohesion: 0.20
 Nodes (5): SelectContent(), SelectScrollDownButton(), SelectScrollUpButton(), lucide-react@^1.77.0, lucide-react
 
-### Community 24 - "Service khung giờ và lịch hẹn"
-Cohesion: 0.31
-Nodes (5): list_available_slots(), list_bookings(), _local_day_start(), _now(), VN_TZ
+### Community 21 - "Cấu hình và migration"
+Cohesion: 0.25
+Nodes (4): run_migrations_offline(), run_migrations_online(), _url(), get_settings()
 
-### Community 25 - "UI: Dialog"
+### Community 22 - "Xác thực và phân quyền"
+Cohesion: 0.24
+Nodes (3): current_user(), optional_user(), require_role()
+
+### Community 23 - "UI: Dialog"
 Cohesion: 0.22
 Nodes (4): DialogContent(), DialogFooter(), DialogOverlay(), DialogPortal()
 
-### Community 26 - "UI: Sheet"
+### Community 24 - "UI: Sheet"
 Cohesion: 0.22
 Nodes (3): SheetContent(), SheetOverlay(), SheetPortal()
 
-### Community 28 - "Migration đầu và test schema"
+### Community 26 - "Migration đầu và test schema"
 Cohesion: 0.36
 Nodes (3): downgrade(), upgrade(), test_migration_creates_business_tables()
 
-### Community 29 - "Bảo vệ DB test"
-Cohesion: 0.32
-Nodes (5): check_test_url(), engine(), _test_url(), test_refuses_test_db_equal_to_dev_db(), test_empty_yaml_phrase_is_rejected()
-
-### Community 31 - "UI: Button và Calendar"
+### Community 29 - "UI: Button và Calendar"
 Cohesion: 0.73
 Nodes (4): Button(), buttonVariants, Calendar(), CalendarDayButton()
 
-### Community 32 - "UI: Input"
+### Community 30 - "UI: Input"
 Cohesion: 0.33
 Nodes (4): @base-ui/react@^1.9.0, react@19.3.0, @base-ui/react, react
 
-### Community 33 - "Icon mẫu Next.js"
+### Community 31 - "Icon mẫu Next.js"
 Cohesion: 0.40
 Nodes (6): Default create-next-app starter assets, File icon (document page outline, grey), Globe icon (circle with meridians), Next.js wordmark logo (black), Vercel triangle logo (white), Browser window icon (grey)
 
 ## Knowledge Gaps
 - **43 isolated node(s):** `mediflow-backend`, `Xử lý phủ định trong 3 token trước cụm triệu chứng`, `Spike thử Gemini (tool call tiếng Việt, JSON, embedding)`, `File icon (document page outline, grey)`, `Globe icon (circle with meridians)` (+38 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 334 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 339 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Package` connect `Models và schemas` to `Models và băm mật khẩu`, `Service đặt lịch và test`, `Service danh mục`, `Test danh mục`, `API bệnh viện`, `Service khung giờ và lịch hẹn`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `Đồ thị LangGraph safety_check→agent⇄tools→output_guard` connect `Che PII` to `Guard đầu ra`, `Phát hiện cờ đỏ`, `Các kế hoạch triển khai`?**
+  _High betweenness centrality (0.134) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `Package` (e.g. with `PackageDetailOut` and `PackageSummary`) actually correct?**
   _`Package` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `mediflow-backend`, `Xử lý phủ định trong 3 token trước cụm triệu chứng`, `Spike thử Gemini (tool call tiếng Việt, JSON, embedding)` to the rest of the system?**
   _43 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Models và băm mật khẩu` be split into smaller, more focused modules?**
-  _Cohesion score 0.05405405405405406 - nodes in this community are weakly interconnected._
+- **Should `Service đặt lịch và test` be split into smaller, more focused modules?**
+  _Cohesion score 0.06179775280898876 - nodes in this community are weakly interconnected._
 - **Why does `Implementation plans 1-6 status table (plans 1-2 done)` connect `Các kế hoạch triển khai` to `Kế hoạch 3: giao diện đặt khám`, `Spec và quy tắc dự án`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.112) - this node is a cross-community bridge._
 - **Are the 11 inferred relationships involving `User` (e.g. with `login()` and `current_user()`) actually correct?**
   _`User` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **Should `Lõi an toàn: luật và nội bộ` be split into smaller, more focused modules?**
-  _Cohesion score 0.059076682316118935 - nodes in this community are weakly interconnected._
+- **Should `Models và schemas` be split into smaller, more focused modules?**
+  _Cohesion score 0.0522466039707419 - nodes in this community are weakly interconnected._
