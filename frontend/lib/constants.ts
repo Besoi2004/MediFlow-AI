@@ -15,3 +15,17 @@ export const TAG_LABEL: Record<string, string> = {
 export const CITY_OPTIONS = ["Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng"];
 
 export const GENDER_LABEL: Record<string, string> = { male: "Nam", female: "Nữ" };
+
+export const CATEGORY_LABEL: Record<string, string> = {
+  kham: "Khám lâm sàng",
+  "xet-nghiem": "Xét nghiệm",
+  "chan-doan-hinh-anh": "Chẩn đoán hình ảnh",
+  "tham-do-chuc-nang": "Thăm dò chức năng",
+};
+
+// Nhóm hạng mục theo loại, giữ thứ tự xuất hiện.
+export function byCategory<T extends { category: string }>(rows: T[]): [string, T[]][] {
+  const groups = new Map<string, T[]>();
+  for (const r of rows) groups.set(r.category, [...(groups.get(r.category) ?? []), r]);
+  return [...groups];
+}
