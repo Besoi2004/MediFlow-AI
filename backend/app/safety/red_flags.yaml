@@ -1,19 +1,31 @@
 # Danh sách cờ đỏ CHỈ ĐỂ HỌC, không thay thế quy trình y tế thật. Viết có dấu; code tự chuẩn hóa.
-# phrases: so trên chữ đã bỏ dấu, nên gõ không dấu vẫn bắt được.
-# exact: cụm mà bỏ dấu sẽ trùng câu vô hại ("cứng cổ"/"cũng có", "tự tử"/"từ từ", "ngất"/"ngạt mũi",
-#   "nói khó"/"nỗi khổ"), nên phải gõ đúng dấu mới bắt. Gõ không dấu thì để lớp 2 (check_symptoms) bắt.
-# Phủ định: bỏ qua lần khớp nếu 3 từ ngay trước (trong cùng vế câu) có một cụm dưới đây.
-negations: [không, chưa, chưa từng, không hề, hết, không còn]
+#
+# Mỗi luật:
+#   phrases: so trên chữ đã bỏ dấu, nên gõ không dấu vẫn bắt được.
+#   exact: cụm mà bỏ dấu sẽ trùng câu vô hại ("tự tử"/"từ từ", "ngất"/"ngạt mũi", "xỉu"/"xíu", "nói khó"/"nỗi khổ"),
+#     nên phải gõ đúng dấu mới bắt. Gõ không dấu thì để lớp 2 (check_symptoms) bắt.
+#   except: cụm vô hại viết có dấu; cụm khớp mà chồng lên cụm này thì bỏ ("nâng ngực" không phải "nặng ngực").
+#   all_of: các nhóm (mỗi nhóm có phrases / exact / except) cùng có mặt trong một tin nhắn thì báo.
+#
+# Từ chức năng dưới đây: tin nhắn có dấu thì so có dấu ("ợ chua" không phải "chưa"), không dấu thì so bỏ dấu.
+# Phủ định: bỏ qua triệu chứng nếu ngay trước nó, cách tối đa 2 từ và trong cùng vế câu, có một cụm phủ định.
+negations: [không, chưa, chưa từng, không hề, hết, không còn, chưa bao giờ, không bao giờ, không có, không thấy]
+# Chỉ dùng khi tin nhắn có dấu: bỏ dấu thì "chả" thành "cha" (bố).
+accented_negations: [chẳng, chả]
 # Cụm bắt đầu bằng từ phủ định nhưng không phủ định triệu chứng theo sau ("hết sức khó thở").
-not_negations: [hết sức, không chỉ, không hiểu sao, không biết sao]
+not_negations: [hết sức, không chỉ, không những, không hiểu sao, không biết sao, chưa kể, không ngờ,
+                không thấy đỡ, không đỡ, không khỏi, không giảm]
 # Từ nối: phủ định đứng trước từ này không phủ định phần sau ("không đau nhưng khó thở"). Mỗi mục một từ.
 connectors: [nhưng, mà, nên, thì]
+# Từ liệt kê: phủ định của triệu chứng trước áp cho triệu chứng sau ("không đau ngực hay khó thở"). Mỗi mục một từ.
+coordinators: [hay, hoặc, và, với]
 
 rules:
   - id: dau_nguc
     severity: emergency
     symptom_code: dau_nguc
-    phrases: [đau ngực, đau thắt ngực, tức ngực, nặng ngực, thắt ngực]
+    phrases: [đau ngực, đau thắt ngực, tức ngực, nặng ngực, thắt ngực, ngực đau]
+    except: [nâng ngực]
 
   - id: kho_tho
     severity: emergency
@@ -25,28 +37,34 @@ rules:
     symptom_code: dot_quy
     phrases: [yếu nửa người, liệt nửa người, tê nửa người, méo miệng, nói ngọng đột ngột, méo mồm]
     exact: [nói khó]
+    except: [bạn nói khó, em nói khó]  # người dùng chê câu trả lời khó hiểu
 
   - id: ngat
     severity: emergency
     symptom_code: ngat
     phrases: [bất tỉnh, ngất xỉu, lịm đi]
-    exact: [ngất]
+    exact: [ngất, xỉu]
+    except: [ngất ngưởng, ngất trời, ngất ngây]
 
   - id: co_giat
     severity: emergency
     symptom_code: co_giat
     phrases: [co giật]
+    except: [có giật]  # "đo điện tim có giật không?"
 
   - id: xuat_huyet
     severity: emergency
     symptom_code: xuat_huyet
-    phrases: [ho ra máu, nôn ra máu, đi ngoài ra máu, chảy máu không cầm, ói ra máu]
+    phrases: [ho ra máu, nôn ra máu, đi ngoài ra máu, đi cầu ra máu, đại tiện ra máu, chảy máu không cầm, ói ra máu]
 
   - id: sot_cung_co
     severity: emergency
     symptom_code: sot_cung_co
     phrases: [sốt cao co giật, sốt cao kèm cứng cổ, sốt cao cứng cổ]
-    exact: [cứng cổ, cứng gáy]
+    # spec: sốt cao kèm cứng cổ; cứng cổ đơn lẻ (ngồi máy tính nhiều) không phải cấp cứu
+    all_of:
+      - {phrases: [sốt]}
+      - {exact: [cứng cổ, cứng gáy]}
 
   - id: tu_tu
     severity: emergency
@@ -59,11 +77,15 @@ rules:
     severity: emergency
     symptom_code: thai_ra_mau
     phrases: [có thai ra máu, mang thai ra máu, đang bầu ra máu, có bầu ra máu]
+    # đang mang thai và bị ra máu trong cùng tin nhắn ("mang thai 10 tuần và bị ra máu")
+    all_of:
+      - {phrases: [có thai, mang thai, thai kỳ, bầu]}
+      - {phrases: [ra máu, chảy máu, ra huyết], except: [chảy máu chân răng, chảy máu cam, chảy máu mũi]}
 
   - id: dau_bung_du_doi
     severity: emergency
     symptom_code: dau_bung_du_doi
-    phrases: [đau bụng dữ dội]
+    phrases: [đau bụng dữ dội, đau bụng rất dữ dội, bụng đau dữ dội]
 
   - id: dau_keo_dai
     severity: see_doctor

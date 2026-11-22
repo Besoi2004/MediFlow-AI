@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,17 @@ def test_normalize_vi(raw, norm):
     ("không hiểu sao đau ngực quá", "dau_nguc"),
     # phủ định đứng trước từ nối ("nhưng", "mà") không phủ định phần sau
     ("tôi không đau nhưng khó thở", "kho_tho"), ("không sốt mà ho ra máu", "xuat_huyet"),
+    # cách nói thường gặp
+    ("Mẹ tôi vừa bị xỉu", "ngat"), ("bố tôi té xỉu ở nhà", "ngat"), ("sốt cao ngất đi", "ngat"),
+    ("Tôi đang mang thai 10 tuần và bị ra máu", "thai_ra_mau"), ("bầu 3 tháng bị ra máu", "thai_ra_mau"),
+    ("có thai mà bị chảy máu", "thai_ra_mau"), ("đi cầu ra máu nhiều", "xuat_huyet"),
+    ("đau bụng rất dữ dội", "dau_bung_du_doi"), ("bụng đau dữ dội", "dau_bung_du_doi"), ("ngực đau nhói", "dau_nguc"),
+    ("bố tôi tự nhiên nói khó hiểu", "dot_quy"), ("uống thuốc không thấy đỡ khó thở", "kho_tho"),
+    # tin nhắn có dấu: "chua", "hét", "hệt", "cha" không phải "chưa", "hết", "chả"
+    ("Tôi bị ợ chua kèm tức ngực", "dau_nguc"), ("Tôi hét lên vì đau ngực", "dau_nguc"),
+    ("đau giống hệt đau ngực lần trước", "dau_nguc"), ("Cha tôi đau ngực", "dau_nguc"),
+    ("Không những đau ngực, tôi còn mệt", "dau_nguc"), ("chưa kể đau ngực từ tối qua", "dau_nguc"),
+    ("Không ngờ bị đau ngực dữ vậy", "dau_nguc"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)
@@ -50,7 +62,16 @@ def test_see_doctor_detected(text):
     "tôi muốn khám tổng quát", "gói tim mạch giá bao nhiêu", "nhịn ăn mấy tiếng trước khi lấy máu",
     # bỏ dấu thì trùng cụm cờ đỏ: cũng có/cứng cổ, từ từ/tự tử, ngạt/ngất, củng cố/cứng cổ, nỗi khổ/nói khó
     "tôi cũng có tiền sử cao huyết áp", "bạn cứ từ từ giải thích", "dạo này tôi hay bị ngạt mũi",
-    "tôi muốn củng cố sức khỏe", "nỗi khổ của người bị tiểu đường"])
+    "tôi muốn củng cố sức khỏe", "nỗi khổ của người bị tiểu đường",
+    # cụm vô hại viết có dấu trùng cụm cờ đỏ; cứng cổ không kèm sốt không phải cấp cứu
+    "Tôi từng nâng ngực, có siêu âm tuyến vú được không?", "Bạn nói khó hiểu quá, giải thích lại giúp mình",
+    "Giá gói này cao ngất ngưởng vậy", "Gói này đắt ngất trời", "Đo điện tim có giật không?",
+    "Sáng ngủ dậy bị cứng cổ, mỏi vai gáy, nên khám gói nào?", "hay bị mỏi cổ cứng gáy do ngồi máy tính",
+    "Tôi có bầu, hay bị chảy máu chân răng",
+    # câu phủ nhận khi trả lời câu hỏi sàng lọc
+    "Tôi không đau ngực hay khó thở gì cả", "Tôi không có triệu chứng đau ngực hay khó thở",
+    "Không có dấu hiệu khó thở", "Tôi chưa bao giờ bị đau ngực", "Tôi không bao giờ bị khó thở",
+    "Tôi chẳng đau ngực gì cả", "Tôi chả khó thở gì"])
 def test_no_false_alarm(text):
     assert detect(text) == []
 
@@ -81,8 +102,26 @@ def test_every_yaml_phrase_matches_itself():
     # cụm nào trong YAML cũng phải bắt được chính nó; bắt lỗi tách từ hoặc gõ cụm không thể khớp
     data = yaml.safe_load(Path(red_flags.__file__).with_name("red_flags.yaml").read_text(encoding="utf-8"))
     for rule in data["rules"]:
-        for phrase in rule["phrases"] + rule.get("exact", []):
+        for phrase in rule.get("phrases", []) + rule.get("exact", []):
             assert rule["id"] in {h.rule_id for h in detect(phrase)}, phrase
+        for phrase in rule.get("except", []):
+            assert rule["id"] not in {h.rule_id for h in detect(phrase)}, phrase
+        if rule.get("all_of"):
+            combo = ", ".join((group.get("phrases") or group["exact"])[0] for group in rule["all_of"])
+            assert rule["id"] in {h.rule_id for h in detect(combo)}, combo
+
+
+def test_long_message_is_fast():
+    # mỗi lần khớp chỉ xét vài từ ngay trước, nên thời gian tăng tuyến tính theo độ dài tin nhắn
+    start = time.perf_counter()
+    detect("không đau ngực " * 3000)
+    assert time.perf_counter() - start < 1.0
+
+
+def test_worst_accepts_severities():
+    # Kế hoạch 4 gộp mức cũ trong state với mức mới: worst([cũ, mới])
+    assert worst(["see_doctor", None, "emergency"]) == "emergency"
+    assert worst([None, "see_doctor"]) == "see_doctor" and worst([None]) is None
 
 
 def test_empty_yaml_phrase_is_rejected(tmp_path):

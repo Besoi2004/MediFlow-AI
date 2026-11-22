@@ -1,6 +1,5 @@
 """Phát hiện dấu hiệu cờ đỏ theo red_flags.yaml (Kế hoạch 2)."""
 import re
-import unicodedata
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,7 +7,7 @@ from typing import Literal, get_args
 
 import yaml
 
-from app.textnorm import normalize_vi
+from app.textnorm import has_vi_marks, normalize_vi, words_vi
 
 Severity = Literal["emergency", "see_doctor"]
 
@@ -18,8 +17,10 @@ EMERGENCY_MESSAGE = (
 )
 SEE_DOCTOR_NOTE = "Triệu chứng bạn kể nên được bác sĩ chuyên khoa khám sớm, thay vì chỉ chờ khám sức khỏe định kỳ."
 
-_NEGATION_WINDOW = 3
+_GAP = 2  # số từ tối đa giữa cụm phủ định và triệu chứng: "không bị đau ngực", "không có triệu chứng khó thở"
 _CLAUSE_BREAK = re.compile(r"[,.;:!?\n]+")
+_YAML = Path(__file__).with_name("red_flags.yaml")
+_Phrases = tuple[tuple[str, ...], ...]
 
 
 @dataclass(frozen=True)
@@ -30,17 +31,28 @@ class Hit:
 
 
 @dataclass(frozen=True)
+class Pattern:
+    phrases: _Phrases  # từ đã bỏ dấu
+    exact: _Phrases  # từ giữ dấu
+    excepts: _Phrases  # từ giữ dấu; đoạn khớp chồng lên một cụm này thì bỏ
+
+
+@dataclass(frozen=True)
 class Rule:
     id: str
     severity: Severity
     symptom_code: str
-    phrases: tuple[tuple[str, ...], ...]  # từ đã bỏ dấu
-    exact: tuple[tuple[str, ...], ...]  # từ giữ dấu
+    pattern: Pattern
+    all_of: tuple[Pattern, ...]  # mọi nhóm cùng có mặt trong tin nhắn, không cần liền nhau
 
 
-def _words(text: str) -> list[str]:
-    """Tách từ, giữ dấu: 'Tự TỬ!' -> ['tự', 'tử']."""
-    return re.findall(r"[^\W_]+", unicodedata.normalize("NFC", text.lower()))
+@dataclass(frozen=True)
+class Grammar:
+    """Từ chức năng ở một dạng: giữ dấu (tin nhắn có dấu) hoặc bỏ dấu (tin nhắn gõ không dấu)."""
+    negations: _Phrases
+    not_negations: _Phrases
+    connectors: frozenset[str]
+    coordinators: frozenset[str]
 
 
 def _starts(words: list[str], phrase: tuple[str, ...]) -> list[int]:
@@ -48,70 +60,93 @@ def _starts(words: list[str], phrase: tuple[str, ...]) -> list[int]:
     return [i for i in range(len(words) - n + 1) if tuple(words[i:i + n]) == phrase]
 
 
-_Phrases = tuple[tuple[str, ...], ...]
-_YAML = Path(__file__).with_name("red_flags.yaml")
-
-
-def _phrases(items: list[str], where: str, *, keep_accents: bool = False) -> _Phrases:
-    """Tách cụm bằng đúng cách tách tin nhắn (_words rồi bỏ dấu từng từ), để hai bên luôn so được với nhau."""
-    out = tuple(tuple(w if keep_accents else normalize_vi(w) for w in _words(p)) for p in items)
+def _phrases(items: list[str], where: str, *, accented: bool = False) -> _Phrases:
+    """Tách cụm đúng như tách tin nhắn (words_vi, rồi bỏ dấu từng từ nếu cần), để hai bên luôn so được."""
+    out = tuple(tuple(w if accented else normalize_vi(w) for w in words_vi(p)) for p in items)
     if any(not p or "" in p for p in out):  # cụm rỗng khớp ở mọi vị trí: một phủ định rỗng sẽ tắt hết cờ đỏ
         raise ValueError(f"red_flags.yaml: có cụm rỗng ở {where}")
     return out
 
 
-def _load(path: Path = _YAML) -> tuple[tuple[Rule, ...], _Phrases, _Phrases, frozenset[str]]:
+def _pattern(d: dict, where: str) -> Pattern:
+    return Pattern(_phrases(d.get("phrases", []), where), _phrases(d.get("exact", []), where, accented=True),
+                   _phrases(d.get("except", []), where, accented=True))
+
+
+def _grammar(data: dict, accented: bool) -> Grammar:
+    def single_words(key: str) -> frozenset[str]:
+        phrases = _phrases(data.get(key, []), key, accented=accented)
+        if any(len(p) != 1 for p in phrases):
+            raise ValueError(f"red_flags.yaml: mỗi mục trong {key} phải là một từ")
+        return frozenset(p[0] for p in phrases)
+
+    negations = data["negations"] + (data.get("accented_negations", []) if accented else [])
+    return Grammar(_phrases(negations, "negations", accented=accented),
+                   _phrases(data.get("not_negations", []), "not_negations", accented=accented),
+                   single_words("connectors"), single_words("coordinators"))
+
+
+def _load(path: Path = _YAML) -> tuple[tuple[Rule, ...], dict[bool, Grammar]]:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     rules = []
     for r in data["rules"]:
         if r["severity"] not in get_args(Severity):  # gõ sai severity thì worst() sẽ bỏ sót cấp cứu
             raise ValueError(f"red_flags.yaml: severity lạ ở luật {r['id']}: {r['severity']}")
-        rules.append(Rule(r["id"], r["severity"], r["symptom_code"], _phrases(r["phrases"], r["id"]),
-                          _phrases(r.get("exact", []), r["id"], keep_accents=True)))
-    return (tuple(rules), _phrases(data["negations"], "negations"),
-            _phrases(data.get("not_negations", []), "not_negations"),
-            frozenset(normalize_vi(c) for c in data.get("connectors", [])))
+        rules.append(Rule(r["id"], r["severity"], r["symptom_code"], _pattern(r, r["id"]),
+                          tuple(_pattern(g, r["id"]) for g in r.get("all_of", []))))
+    return tuple(rules), {True: _grammar(data, True), False: _grammar(data, False)}
 
 
-RULES, NEGATIONS, NOT_NEGATIONS, CONNECTORS = _load()
+RULES, GRAMMAR = _load()
 SYMPTOM_CODES: tuple[str, ...] = tuple(r.symptom_code for r in RULES)
+# Khóa (id luật, nhóm): nhóm -1 là cụm chính của luật, 0, 1... là các nhóm all_of
+_PATTERNS = [((r.id, -1), r.pattern) for r in RULES] + [((r.id, k), p) for r in RULES for k, p in enumerate(r.all_of)]
 
 
-def _before(norm: list[str], i: int) -> list[str]:
-    """Tối đa 3 từ ngay trước vị trí i, bỏ phần đứng trước từ nối gần nhất ("không đau nhưng khó thở")."""
-    before = norm[max(0, i - _NEGATION_WINDOW):i]
-    cuts = [k for k, w in enumerate(before) if w in CONNECTORS]
-    return before[cuts[-1] + 1:] if cuts else before
+def _spans(p: Pattern, raw: list[str], norm: list[str]) -> list[tuple[int, int]]:
+    """Các đoạn [đầu, cuối) khớp cụm của p, trừ đoạn chồng lên một cụm loại trừ."""
+    masked = {k for x in p.excepts for j in _starts(raw, x) for k in range(j, j + len(x))}
+    spans = [(i, i + len(ph)) for words, phrases in ((norm, p.phrases), (raw, p.exact))
+             for ph in phrases for i in _starts(words, ph)]
+    return [(s, e) for s, e in spans if masked.isdisjoint(range(s, e))]
 
 
-def _negated(before: list[str]) -> bool:
-    """Các từ ngay trước có cụm phủ định, trừ cụm như "hết sức", "không chỉ"."""
-    return any(
-        not any(tuple(before[j:j + len(x)]) == x for x in NOT_NEGATIONS)
-        for neg in NEGATIONS for j in _starts(before, neg)
-    )
-
-
-def _match(rule: Rule, raw: list[str], norm: list[str]) -> str | None:
-    """Cụm đầu tiên của luật khớp mà không bị phủ định; trả về cụm đó (đã bỏ dấu)."""
-    for words, phrases in ((norm, rule.phrases), (raw, rule.exact)):
-        for phrase in phrases:
-            for i in _starts(words, phrase):
-                if not _negated(_before(norm, i)):
-                    return " ".join(norm[i:i + len(phrase)])
-    return None
+def _negated(fw: list[str], s: int, g: Grammar) -> bool:
+    """Có cụm phủ định kết thúc cách s tối đa _GAP từ, không bị từ nối chặn, không phải cụm như "hết sức"."""
+    lo = max(0, s - _GAP - max(map(len, g.negations)))  # chỉ xét vài từ ngay trước s, để chạy tuyến tính
+    for neg in g.negations:
+        for j in (lo + k for k in _starts(fw[lo:s], neg)):
+            end = j + len(neg)
+            if (s - end <= _GAP and g.connectors.isdisjoint(fw[end:s])
+                    and not any(tuple(fw[j:j + len(x)]) == x for x in g.not_negations)):
+                return True
+    return False
 
 
 def detect(text: str) -> list[Hit]:
-    hits: dict[str, Hit] = {}
+    accented = has_vi_marks(text)
+    g = GRAMMAR[accented]
+    found: dict[tuple[str, int], str] = {}  # (id luật, nhóm) -> cụm đầu tiên không bị phủ định
     # Xét từng vế câu: "Không, tôi đau ngực" thì "không" không phủ định "đau ngực"
     for clause in _CLAUSE_BREAK.split(text):
-        raw = _words(clause)
+        raw = words_vi(clause)
         norm = [normalize_vi(w) for w in raw]
-        for rule in RULES:
-            if rule.id not in hits and (matched := _match(rule, raw, norm)):
-                hits[rule.id] = Hit(rule.id, rule.severity, matched)
-    return list(hits.values())
+        fw = raw if accented else norm
+        negated_ends: set[int] = set()
+        for s, e, key in sorted((s, e, key) for key, p in _PATTERNS for s, e in _spans(p, raw, norm)):
+            # triệu chứng liệt kê sau "hay/hoặc/và" nhận phủ định của triệu chứng ngay trước
+            listed = s > 0 and fw[s - 1] in g.coordinators and s - 1 in negated_ends
+            if listed or _negated(fw, s, g):
+                negated_ends.add(e)
+            else:
+                found.setdefault(key, " ".join(norm[s:e]))
+    hits = []
+    for r in RULES:
+        if (r.id, -1) in found:
+            hits.append(Hit(r.id, r.severity, found[(r.id, -1)]))
+        elif r.all_of and all((r.id, k) in found for k in range(len(r.all_of))):
+            hits.append(Hit(r.id, r.severity, " + ".join(found[(r.id, k)] for k in range(len(r.all_of)))))
+    return hits
 
 
 def evaluate_codes(codes: Iterable[str]) -> list[Hit]:
@@ -120,8 +155,9 @@ def evaluate_codes(codes: Iterable[str]) -> list[Hit]:
     return list(hits.values())
 
 
-def worst(hits: list[Hit]) -> Severity | None:
-    severities = {h.severity for h in hits}
+def worst(items: Iterable[Hit | Severity | None]) -> Severity | None:
+    """Mức nặng nhất. Nhận Hit hoặc mức, để Kế hoạch 4 gộp mức cũ trong state với mức mới: worst([cũ, mới])."""
+    severities = {i.severity if isinstance(i, Hit) else i for i in items}
     if "emergency" in severities:
         return "emergency"
     return "see_doctor" if "see_doctor" in severities else None

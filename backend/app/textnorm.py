@@ -18,6 +18,16 @@ def slug_vi(text: str) -> str:
     return normalize_vi(text).replace(" ", "-")
 
 
+def words_vi(text: str) -> list[str]:
+    """Tách từ, chữ thường, giữ dấu: 'Tự TỬ!' -> ['tự', 'tử']."""
+    return re.findall(r"[^\W_]+", unicodedata.normalize("NFC", text.lower()))
+
+
+def has_vi_marks(text: str) -> bool:
+    """Có dấu tiếng Việt không: 'đau ngực' có, 'dau nguc' không."""
+    return "đ" in text.lower() or any(unicodedata.category(c) == "Mn" for c in unicodedata.normalize("NFD", text))
+
+
 _CITY_PREFIXES = ("thanh-pho-", "tp-", "tinh-")
 _CITY_ALIASES = {
     "hcm": "ho-chi-minh", "tphcm": "ho-chi-minh", "sai-gon": "ho-chi-minh", "saigon": "ho-chi-minh",
