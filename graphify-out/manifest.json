@@ -132,10 +132,10 @@
     "semantic_hash": "78e15e513a4c636fb5142429502447a0"
   },
   "backend/app/safety/output_guard.py": {
-    "mtime": 1795363283.952527,
-    "seen": 1795363653.2180674,
-    "ast_hash": "b551190e6b84089daf39f1688c73ecbf",
-    "semantic_hash": "b551190e6b84089daf39f1688c73ecbf"
+    "mtime": 1795364195.9642417,
+    "seen": 1795364247.3086164,
+    "ast_hash": "c5dd531a716f973052d6f2bd300ccbe9",
+    "semantic_hash": "c5dd531a716f973052d6f2bd300ccbe9"
   },
   "backend/app/safety/pii.py": {
     "mtime": 1795363404.9374707,
@@ -558,10 +558,10 @@
     "semantic_hash": "a2760511c65806022ad20adf74370ff3"
   },
   "backend/tests/test_output_guard.py": {
-    "mtime": 1795363447.045201,
-    "seen": 1795363653.2181232,
-    "ast_hash": "1e2c15718c7d5a12ea486d84f5528f15",
-    "semantic_hash": "1e2c15718c7d5a12ea486d84f5528f15"
+    "mtime": 1795364171.9245677,
+    "seen": 1795364247.3086638,
+    "ast_hash": "4afaa3b2fc35df2d404d2e0092240875",
+    "semantic_hash": "4afaa3b2fc35df2d404d2e0092240875"
   },
   "backend/tests/test_pii.py": {
     "mtime": 1795363359.1619296,
