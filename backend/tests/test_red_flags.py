@@ -54,6 +54,9 @@ def test_normalize_vi(raw, norm):
     ("Tôi buồn muốn chết", "tu_tu"), ("đau khổ muốn chết", "tu_tu"), ("tôi mệt mỏi, muốn chết", "tu_tu"),
     # từ nói quá đi cùng dấu hiệu ý định thật thì vẫn báo
     ("Tôi mệt mỏi chỉ muốn chết", "tu_tu"), ("mệt quá chỉ muốn chết", "tu_tu"), ("Tôi mệt mỏi muốn chết", "tu_tu"),
+    # từ nói quá chỉ tắt "muốn chết"; "không muốn sống", "tự tử" thì không bao giờ là nói quá
+    ("tôi mệt không muốn sống nữa", "tu_tu"), ("mệt quá không muốn sống", "tu_tu"), ("lo quá muốn tự tử", "tu_tu"),
+    ("sợ quá nghĩ đến tự tử", "tu_tu"), ("mệt quá muốn tự sát", "tu_tu"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)
@@ -113,10 +116,11 @@ def test_every_yaml_phrase_matches_itself():
     # cụm nào trong YAML cũng phải bắt được chính nó; bắt lỗi tách từ hoặc gõ cụm không thể khớp
     data = yaml.safe_load(Path(red_flags.__file__).with_name("red_flags.yaml").read_text(encoding="utf-8"))
     for rule in data["rules"]:
-        for phrase in rule.get("phrases", []) + rule.get("exact", []):
-            assert rule["id"] in {h.rule_id for h in detect(phrase)}, phrase
-        for phrase in rule.get("except", []):
-            assert rule["id"] not in {h.rule_id for h in detect(phrase)}, phrase
+        for group in [rule, *rule.get("any_of", [])]:
+            for phrase in group.get("phrases", []) + group.get("exact", []):
+                assert rule["id"] in {h.rule_id for h in detect(phrase)}, phrase
+            for phrase in group.get("except", []):
+                assert rule["id"] not in {h.rule_id for h in detect(phrase)}, phrase
         if rule.get("all_of"):
             combo = ", ".join((group.get("phrases") or group["exact"])[0] for group in rule["all_of"])
             assert rule["id"] in {h.rule_id for h in detect(combo)}, combo
