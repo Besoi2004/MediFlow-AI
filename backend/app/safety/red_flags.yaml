@@ -26,56 +26,75 @@ rules:
   - id: dau_nguc
     severity: emergency
     symptom_code: dau_nguc
-    phrases: [đau ngực, đau thắt ngực, tức ngực, nặng ngực, thắt ngực, ngực đau]
+    phrases: [đau ngực, đau thắt ngực, tức ngực, nặng ngực, thắt ngực, ngực đau, đau lồng ngực, tức lồng ngực,
+              đau vùng ngực, đau ở ngực, đau giữa ngực, đau bên ngực, nhói ngực, đè nặng ngực, ngực bị đè, nhói tim,
+              lên cơn đau tim]
+    # không có "đau tim" đơn lẻ: "gói này có phát hiện bệnh đau tim không?" là câu hỏi, không phải triệu chứng
     except: [nâng ngực]
 
   - id: kho_tho
     severity: emergency
     symptom_code: kho_tho
-    phrases: [khó thở, thở dốc, hụt hơi, ngạt thở, không thở được]
+    phrases: [khó thở, thở dốc, hụt hơi, ngạt thở, không thở được, thở không được, thở không nổi, không thở nổi,
+              thở không ra hơi, khó hít thở, thở khó, nghẹt thở]
+    # không có "thở gấp", "thở hổn hển": hay đi sau gắng sức ("leo cầu thang thở gấp"); để lớp 2 xét
 
   - id: dot_quy
     severity: emergency
     symptom_code: dot_quy
-    phrases: [yếu nửa người, liệt nửa người, tê nửa người, méo miệng, nói ngọng đột ngột, méo mồm]
-    exact: [nói khó]
-    # người dùng chê câu trả lời khó hiểu. Không loại "em nói khó": "em" còn là "của tôi" ("bố em nói khó"),
-    # nên "em nói khó hiểu quá" vẫn bị báo; cố ý chấp nhận báo nhầm để không bỏ sót đột quỵ
-    except: [bạn nói khó]
+    # không có "đột quỵ", "tai biến": hay là tiền sử ("bố tôi từng bị đột quỵ") hoặc tên gói tầm soát
+    phrases: [yếu nửa người, liệt nửa người, tê nửa người, méo miệng, nói ngọng đột ngột, méo mồm, miệng méo,
+              miệng bị méo, mồm méo, yếu một bên, tê một bên, liệt một bên, tê nửa mặt, liệt nửa mặt, đớ lưỡi,
+              đột nhiên nói ngọng, tự nhiên nói ngọng]
+    exact: [nói đớ]  # bỏ dấu thì trùng "nói đó"
+    any_of:
+      - exact: [nói khó]  # bỏ dấu thì trùng "nỗi khổ"
+        # người dùng chê câu trả lời khó hiểu. Không loại "em nói khó": "em" còn là "của tôi" ("bố em nói khó"),
+        # nên "em nói khó hiểu quá" vẫn bị báo; cố ý chấp nhận báo nhầm để không bỏ sót đột quỵ
+        except: [bạn nói khó]
+        not_after: [nghe, bảo, bác sĩ, người ta, họ]  # "nghe nói khó đặt lịch", "bác sĩ nói khó lắm"
 
   - id: ngat
     severity: emergency
     symptom_code: ngat
-    phrases: [bất tỉnh, ngất xỉu, lịm đi]
-    exact: [ngất, xỉu]
+    phrases: [bất tỉnh, ngất xỉu, lịm đi, mất ý thức, mất tri giác]
+    # bỏ dấu thì trùng "ngạt", "xíu", "hơn mẹ", "gói không tính", "mẹ mặn"
+    exact: [ngất, xỉu, hôn mê, gọi không tỉnh, gọi không dậy, mê man]
     except: [ngất ngưởng, ngất trời, ngất ngây]
 
   - id: co_giat
     severity: emergency
     symptom_code: co_giat
-    phrases: [co giật]
+    phrases: [co giật, sùi bọt mép, lên cơn giật]
     except: [có giật]  # "đo điện tim có giật không?"
 
   - id: xuat_huyet
     severity: emergency
     symptom_code: xuat_huyet
-    phrases: [ho ra máu, nôn ra máu, đi ngoài ra máu, đi cầu ra máu, đại tiện ra máu, chảy máu không cầm, ói ra máu]
+    phrases: [ho ra máu, nôn ra máu, đi ngoài ra máu, đi cầu ra máu, đại tiện ra máu, đi tiêu ra máu, ói ra máu,
+              khạc ra máu, chảy máu không cầm, chảy máu không ngừng, máu chảy không cầm, máu chảy không ngừng]
+    exact: [phân có máu]  # bỏ dấu thì trùng "phần có màu"
 
   - id: sot_cung_co
     severity: emergency
     symptom_code: sot_cung_co
     phrases: [sốt cao co giật, sốt cao kèm cứng cổ, sốt cao cứng cổ]
-    # spec: sốt cao kèm cứng cổ; cứng cổ đơn lẻ (ngồi máy tính nhiều) không phải cấp cứu
+    # spec: sốt cao kèm cứng cổ; cứng cổ đơn lẻ (ngồi máy tính nhiều) không phải cấp cứu.
+    # "sốt" để exact vì bỏ dấu trùng "sót" ("bỏ sót"); nhóm cứng cổ vốn đã exact nên không mất gì khi gõ không dấu
     all_of:
-      - {phrases: [sốt]}
+      - {exact: [sốt]}
       - {exact: [cứng cổ, cứng gáy]}
 
   - id: tu_tu
     severity: emergency
     symptom_code: tu_tu
+    # không có "kết thúc cuộc sống/cuộc đời": "kết thúc cuộc sống độc thân" (khám tiền hôn nhân)
     phrases: [tự sát, không muốn sống, không còn muốn sống, chẳng muốn sống, chẳng còn muốn sống, chán sống,
-              không thiết sống, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử]
-    exact: [tự tử]
+              không thiết sống, không muốn tồn tại, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử, quyên sinh,
+              kết liễu, tìm đến cái chết, chết cho xong, chết quách, tự làm hại bản thân, tự làm hại mình,
+              tự làm đau bản thân, rạch tay]
+    exact: [tự tử, tự vẫn]  # bỏ dấu thì trùng "từ từ", "tư vấn"
+    except: [chán sống độc thân]
     any_of:
       # chỉ "muốn chết" mới hay là nói quá; "mệt không muốn sống", "lo quá muốn tự tử" thì luôn báo
       - phrases: [muốn chết]
@@ -89,37 +108,59 @@ rules:
     severity: emergency
     symptom_code: thai_ra_mau
     phrases: [có thai ra máu, mang thai ra máu, đang bầu ra máu, có bầu ra máu]
-    # đang mang thai và bị ra máu trong cùng tin nhắn ("mang thai 10 tuần và bị ra máu")
+    # đang mang thai và bị ra máu trong cùng tin nhắn ("mang thai 10 tuần và bị ra máu").
+    # "thai" để exact vì bỏ dấu trùng "Thái" (Thái Bình, Thái Nguyên)
     all_of:
-      - {phrases: [có thai, mang thai, thai kỳ, bầu]}
-      - {phrases: [ra máu, chảy máu, ra huyết], except: [chảy máu chân răng, chảy máu cam, chảy máu mũi]}
+      - {phrases: [có thai, mang thai, thai kỳ, bầu], exact: [thai]}
+      - {phrases: [ra máu, chảy máu, ra huyết, rỉ máu], except: [chảy máu chân răng, chảy máu cam, chảy máu mũi]}
 
   - id: dau_bung_du_doi
     severity: emergency
     symptom_code: dau_bung_du_doi
-    phrases: [đau bụng dữ dội, đau bụng rất dữ dội, bụng đau dữ dội]
+    phrases: [đau bụng dữ dội, đau bụng rất dữ dội, bụng đau dữ dội, đau bụng quằn quại, bụng đau quằn quại,
+              đau bụng không chịu nổi, đau bụng không chịu được, đau bụng lăn lộn]
 
+  # Ba luật "kéo dài": chỗ đau, sốt, ho thường đứng giữa ("đau lưng mấy tuần nay"), nên ngoài cụm liền còn bắt
+  # khi tin nhắn vừa có triệu chứng vừa có từ chỉ thời gian. "đau", "sốt", "ho" để exact vì bỏ dấu trùng
+  # "đâu", "sót", "họ"; gõ không dấu thì chỉ bắt cụm liền. Báo nhầm chỉ thêm lời khuyên đi khám, chấp nhận được.
   - id: dau_keo_dai
     severity: see_doctor
     symptom_code: dau_keo_dai
     phrases: [đau kéo dài, đau mấy ngày nay, đau nhiều ngày]
+    all_of:
+      - {exact: [đau, nhức]}
+      - &keo_dai
+        phrases: [kéo dài, mấy ngày nay, mấy hôm nay, mấy tuần nay, cả tuần nay, mấy tháng nay, cả tháng nay,
+                  lâu ngày, mãi không khỏi, mãi không hết, hoài không hết, hoài không khỏi]
+        except: [kéo dài bao lâu, kéo dài mấy, có kéo dài]  # hỏi về buổi khám: "khám kéo dài bao lâu?"
 
   - id: sot_keo_dai
     severity: see_doctor
     symptom_code: sot_keo_dai
     phrases: [sốt kéo dài, sốt mấy ngày]
+    all_of:
+      - {exact: [sốt]}
+      - *keo_dai
 
   - id: sut_can
     severity: see_doctor
     symptom_code: sut_can
-    phrases: [sụt cân không rõ lý do, sụt cân nhanh, giảm cân không rõ nguyên nhân, sụt cân không rõ nguyên nhân]
+    # "giảm cân" đơn lẻ thường là mong muốn ("muốn giảm cân"), nên chỉ bắt khi liền "không rõ", "tự nhiên".
+    # shortcut: "Tự nhiên tôi giảm cân" không bắt được (có chữ chen giữa); để lớp 2 xét
+    phrases: [sụt cân, sút cân, sụt ký, sụt kí, gầy sút, giảm cân không rõ, tự nhiên giảm cân, tự dưng giảm cân]
 
   - id: khoi_u
     severity: see_doctor
     symptom_code: khoi_u
-    phrases: [sờ thấy khối u, nổi cục, có khối u]
+    # không có "khối u" đơn lẻ: "tầm soát khối u", "từng mổ khối u" là câu hỏi hoặc tiền sử
+    phrases: [sờ thấy khối u, có khối u, bị khối u, mọc khối u, cục u, nổi u, nổi cục, sờ thấy cục, nổi hạch,
+              sưng hạch, nổi bướu, có bướu]
+    exact: [có cục, có hạch]  # bỏ dấu thì trùng "có cực" ("có cực kỳ nhiều")
 
   - id: ho_keo_dai
     severity: see_doctor
     symptom_code: ho_keo_dai
     phrases: [ho kéo dài, ho mấy tuần]
+    all_of:
+      - {exact: [ho]}
+      - *keo_dai

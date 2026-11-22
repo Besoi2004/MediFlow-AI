@@ -1,0 +1,169 @@
+# Tin nhắn khách có thể gõ thật, để sửa red_flags.yaml không làm hỏng ca cũ.
+# Mỗi khóa là id luật phải được báo. Khóa none: các câu không được báo gì.
+# test còn tự bỏ dấu từng câu (giữ dấu câu): cụm trong phrases phải bắt được cả khi gõ không dấu.
+dau_nguc:
+  - Tự nhiên tôi đau thắt ngực, vã mồ hôi
+  - Sáng nay bố tôi kêu tức ngực, khó chịu lắm
+  - Em bị đau lồng ngực bên trái từ tối qua
+  - Cảm giác như có gì đè nặng ngực
+  - Tôi hay bị đau nhói ngực khi leo cầu thang
+  - Mẹ tôi đau ở ngực, lan ra cánh tay
+  - Đau giữa ngực, khó chịu quá
+  - Bố tôi lên cơn đau tim
+  # không có "Tôi bị ợ chua kèm tức ngực": gõ không dấu thì "chua" trùng "chưa", câu thành phủ định
+kho_tho:
+  - Tôi khó thở quá
+  - Con tôi thở không được, phải làm sao
+  - Bố tôi thở không nổi, môi tím tái
+  - Tôi bị khó hít thở khi nằm
+  - Tôi bị hụt hơi, đi vài bước đã mệt
+  - Tôi bị nghẹt thở từng cơn
+  - Uống thuốc không thấy đỡ khó thở
+dot_quy:
+  - Bố tôi bị méo miệng, nói khó từ sáng
+  - Bố em nói khó từ sáng
+  - Ông tôi tự nhiên yếu nửa người bên phải
+  - Mẹ tôi bị tê một bên mặt và tay
+  - Bà tôi miệng bị méo, nói đớ
+  - Chồng tôi đột nhiên nói ngọng
+  - Ông em bị liệt một bên tay chân
+ngat:
+  - Mẹ tôi vừa bị xỉu
+  - Bố tôi té xỉu ở nhà
+  - Ông tôi bất tỉnh, gọi không tỉnh
+  - Bà tôi tự nhiên lịm đi
+  - Chồng tôi ngất khi đang đứng
+  - Bố tôi hôn mê từ sáng
+co_giat:
+  - Con tôi co giật, sùi bọt mép
+  - Bé lên cơn co giật lúc sốt
+  - Em trai tôi lên cơn giật toàn thân
+xuat_huyet:
+  - Tôi bị ho ra máu
+  - Bố tôi nôn ra máu nhiều
+  - Mấy hôm nay tôi đi ngoài ra máu tươi
+  - Tôi đi cầu ra máu
+  - Mẹ tôi khạc ra máu
+  - Vết thương chảy máu không cầm được
+  - Mũi chảy máu không ngừng
+sot_cung_co:
+  - Con tôi sốt cao, cứng cổ
+  - Bé sốt 39 độ, cứng gáy, quấy khóc
+  - Tôi bị sốt từ hôm qua, giờ cứng cổ không cúi được
+tu_tu:
+  - Dạo này tôi muốn chết
+  - Tôi muốn tự tử
+  - Tôi không muốn sống nữa
+  - Tôi không còn muốn sống nữa
+  - Tôi chẳng muốn sống
+  - Tôi chán sống quá
+  - Em không thiết sống nữa
+  - Tôi mệt mỏi chỉ muốn chết
+  - Tôi mệt không muốn sống nữa
+  - Lo quá, tôi chỉ muốn tự tử
+  - Tôi đã nghĩ đến tự tử
+  - Tôi chỉ muốn chết cho xong
+  - Tôi muốn tự kết liễu
+  - Tôi hay tự làm hại bản thân
+  - Tôi buồn muốn chết
+thai_ra_mau:
+  - Tôi đang có thai ra máu
+  - Tôi đang mang thai 10 tuần và bị ra máu
+  - Bầu 3 tháng bị ra máu
+  - Vợ tôi có bầu, sáng nay chảy máu
+  - Thai 8 tuần, tôi bị ra huyết
+dau_bung_du_doi:
+  - Tôi đau bụng dữ dội
+  - Bụng đau dữ dội từ chiều
+  - Con tôi đau bụng quằn quại
+  - Tôi đau bụng không chịu nổi
+  - Bố tôi đau bụng lăn lộn
+dau_keo_dai:
+  - Tôi bị đau lưng mấy tuần nay
+  - Đau đầu kéo dài cả tháng nay
+  - Tôi đau dạ dày hoài không hết
+  - Tôi nhức đầu mấy hôm nay
+sot_keo_dai:
+  - Tôi sốt kéo dài
+  - Con tôi sốt cao mấy ngày nay
+  - Tôi bị sốt nhẹ cả tuần nay
+ho_keo_dai:
+  - Tôi ho kéo dài cả tháng
+  - Tôi bị ho khan mấy tuần nay
+  - Bố tôi ho có đờm hoài không khỏi
+sut_can:
+  - Tôi sụt cân không rõ lý do 2 tháng nay
+  - Dạo này mẹ tôi sút cân nhiều
+  - Bố tôi gầy sút hẳn
+khoi_u:
+  - Tôi sờ thấy khối u ở cổ
+  - Tôi bị nổi hạch ở cổ
+  - Ngực tôi có cục cứng
+  - Tôi có bướu ở cổ
+  - Sau tai bị nổi cục
+
+none:
+  # câu hỏi đặt lịch thường gặp
+  - Tôi muốn khám tổng quát
+  - Gói tim mạch giá bao nhiêu?
+  - Nhịn ăn mấy tiếng trước khi lấy máu?
+  - Bệnh viện Alpha ở đâu?
+  - Khám ở đâu thì gần nhà tôi nhất?
+  - Tôi muốn đặt hộ mẹ tôi 62 tuổi
+  - Họ có làm siêu âm không?
+  - Hồ sơ cần mang gì?
+  - Kết quả bao lâu thì có?
+  - Tư vấn giúp tôi gói nào hợp với nam 35 tuổi
+  - Tôi muốn tầm soát ung thư vú và cổ tử cung
+  - Gói khám tiền hôn nhân gồm những gì?
+  - Tôi muốn giảm cân, có gói dinh dưỡng không?
+  - Gói này có đo điện tim không?
+  - Đo điện tim có giật không?
+  - Gói này có lấy máu không, tôi sợ kim
+  - Tôi bị cao huyết áp, nên khám gói nào?
+  - Bố tôi có tiền sử tiểu đường
+  - Tôi hay bị ngạt mũi
+  - Tôi muốn củng cố sức khỏe
+  - Bạn cứ từ từ giải thích
+  - Tôi cũng có tiền sử cao huyết áp
+  - Chuẩn bị kết thúc cuộc sống độc thân, nên khám tiền hôn nhân gói nào?
+  - Bạn nói khó hiểu quá, giải thích lại giúp mình
+  - Như tôi nói đó, tôi muốn khám buổi sáng
+  - Giá gói này cao ngất ngưởng vậy
+  - Gói này không tính phí đăng ký à?
+  - Mẹ tôi lớn hơn mẹ bạn ấy 2 tuổi
+  - Tôi từng nâng ngực, có siêu âm tuyến vú được không?
+  - Gói khám mất bao lâu, có kéo dài không?
+  - Tôi có bầu, hay bị chảy máu chân răng
+  - Đi khám thai có cần nhịn ăn không?
+  - Sáng ngủ dậy bị cứng cổ, mỏi vai gáy, nên khám gói nào?
+  - Tôi có bỏ sót xét nghiệm nào không?
+  - Tôi muốn tầm soát khối u, có gói nào không?
+  - Tôi từng mổ khối u lành tính, giờ khám lại được không?
+  - Gói tầm soát tim mạch có phát hiện bệnh đau tim không?
+  - Tôi muốn giảm cân tự nhiên, có tư vấn dinh dưỡng không?
+  - Leo cầu thang tôi hơi thở gấp, có nên khám tim không?
+  - Buổi khám kéo dài bao lâu? Tôi hay đau đầu
+  - Chồng tôi chán sống độc thân lắm rồi nên muốn cưới, khám tiền hôn nhân gói nào?
+  - Bác sĩ nói khó lắm mới đặt được lịch
+  - Tôi nghe nói khó đặt lịch cuối tuần
+  - Kết quả có ra mau không bạn?
+  - Nhà tôi ở Thái Bình, có bệnh viện nào gần không?
+  - Vợ tôi đang mang thai, có gói khám nào cho bà bầu không?
+  - Có thai thì có lấy máu xét nghiệm được không?
+  - Tôi vừa hiến máu, có khám được không?
+  - Con tôi hay bị ho khi trời lạnh
+  - Bé nhà tôi sốt nhẹ hôm qua, nay hết rồi
+  - Gói này đắt chết đi được
+  - Gói này có nổi bật gì so với gói kia?
+  # phủ nhận khi trả lời câu hỏi sàng lọc
+  - Tôi không đau ngực hay khó thở gì cả
+  - Không có dấu hiệu khó thở
+  - Tôi chưa bao giờ bị đau ngực
+  - Tôi không bị đau ngực, khó thở, hay chóng mặt gì
+  - Không sốt, không ho
+  - Tôi không bị sụt cân
+  # nói quá
+  - Tôi sợ lấy máu muốn chết
+  - Trời nóng muốn chết
+  - Mệt muốn chết luôn
