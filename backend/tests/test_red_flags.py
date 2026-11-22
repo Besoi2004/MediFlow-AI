@@ -52,7 +52,7 @@ def test_normalize_vi(raw, norm):
     # "muốn chết" sau từ cảm xúc thật thì vẫn báo
     ("Tôi buồn muốn chết", "tu_tu"), ("đau khổ muốn chết", "tu_tu"), ("tôi mệt mỏi, muốn chết", "tu_tu"),
     # từ nói quá đi cùng dấu hiệu ý định thật thì vẫn báo
-    ("Tôi mệt mỏi chỉ muốn chết", "tu_tu"), ("mệt quá chỉ muốn chết", "tu_tu"),
+    ("Tôi mệt mỏi chỉ muốn chết", "tu_tu"), ("mệt quá chỉ muốn chết", "tu_tu"), ("Tôi mệt mỏi muốn chết", "tu_tu"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)

@@ -1,6 +1,8 @@
 """Che số điện thoại, email, CCCD, CMND, tên tự giới thiệu trước khi gửi LLM hoặc lưu (Kế hoạch 2)."""
 import re
 
+from app.safety.red_flags import detect
+
 # Thứ tự quan trọng: email trước (có thể chứa số), CCCD trước số điện thoại.
 _PATTERNS = (
     # (?<!...) để chỉ thử từ đầu chuỗi ký tự email: không có nó regex chạy bậc hai với chuỗi dài
@@ -23,32 +25,47 @@ _NAME_CUE = re.compile(r"(?i)\b(?:tên\s+(?:tôi|mình|em|con|cháu|của\s+tôi
                        r"|(?:tôi|mình|em|con|cháu|anh|chị)\s+tên)(?:\s+là)?[ \t]+")
 _WORD = re.compile(r"[ \t]*([^\W\d_]+)")
 _NOT_NAME = {"gì", "tuổi", "năm", "sinh", "ở", "và", "muốn", "đang", "cần", "nhé", "ạ", "nha", "thì", "mà", "nhưng",
-             "làm", "đi", "đặt", "khám", "hỏi", "có", "được", "bị", "cho", "là", "nay", "hiện", "nhỉ", "vậy", "này"}
+             "làm", "đi", "đặt", "khám", "hỏi", "có", "được", "bị", "cho", "là", "nay", "hiện", "nhỉ", "vậy", "này",
+             # đầu cụm triệu chứng: "tôi tên lan đau ngực" chỉ che "lan"
+             "đau", "nhức", "mệt", "sốt", "ho", "khó", "tức", "chóng", "nôn", "ói", "buồn", "ngất", "xỉu", "không",
+             "hay", "rất", "thấy", "cảm"}
 
 
-def _name_end(text: str, pos: int) -> int:
-    """Hết tên bắt đầu ở pos: các từ viết hoa liền nhau (tối đa 5), hoặc tối đa 3 từ thường trước một từ không phải tên."""
+def _name_end(text: str, pos: int, max_lower: int) -> int:
+    """Hết tên bắt đầu ở pos: các từ viết hoa liền nhau (tối đa 5), hoặc tối đa max_lower từ thường trước một từ
+    không phải tên."""
     end, count, capital = pos, 0, None
     while count < 5 and (m := _WORD.match(text, end)):
         word = m[1]
         capital = word[0].isupper() if capital is None else capital
-        if (capital and not word[0].isupper()) or (not capital and (word.lower() in _NOT_NAME or count == 3)):
+        if (capital and not word[0].isupper()) or (not capital and (word.lower() in _NOT_NAME or count == max_lower)):
             break
         end, count = m.end(), count + 1
     return end
 
 
-def _redact_names(text: str) -> str:
+def _redact_names(text: str, max_lower: int) -> str:
     out, pos = [], 0
     for m in _NAME_CUE.finditer(text):
-        end = _name_end(text, m.end())
+        end = _name_end(text, m.end(), max_lower)
         if m.start() >= pos and end > m.end():
             out += [text[pos:m.end()], "[TÊN]"]
             pos = end
     return "".join(out) + text[pos:]
 
 
+def _flags(text: str) -> set[str]:
+    return {h.rule_id for h in detect(text)}
+
+
 def redact(text: str) -> str:
     for pattern, label in _PATTERNS:
         text = pattern.sub(label, text)
-    return _redact_names(text)
+    # Kế hoạch 4 chạy detect() trên bản đã che, nên che tên không được làm mất cờ đỏ nào:
+    # nuốt mất triệu chứng thì che hẹp lại (tên thường chỉ một chữ), vẫn mất thì không che tên.
+    flags = _flags(text)
+    for max_lower in (3, 1):
+        masked = _redact_names(text, max_lower)
+        if not flags or flags <= _flags(masked):
+            return masked
+    return text

@@ -60,16 +60,18 @@ def test_unknown_hospital_flagged():
 
 
 def test_hospital_names_compared_in_full():
-    # tên đăng ký có thể bắt đầu bằng "BV"; bệnh viện khác chỉ trùng chữ đầu vẫn là bệnh viện lạ
+    # tên đăng ký có thể bắt đầu bằng "BV"
     kw = {"known_codes": CODES, "allowed_amounts": PRICES}
     assert check("Bệnh viện Alpha có gói [ALP-CB01]", **kw, known_hospitals={"BV Alpha"}) == []
-    assert check("Bệnh viện Hồng Đức có gói [ALP-CB01]", **kw, known_hospitals={"Bệnh viện Hồng Ngọc"}) != []
-    assert check("Bệnh viện Hồng Ngọc Phúc Trường Minh có gói [ALP-CB01]", **kw,
-                 known_hospitals={"Bệnh viện Hồng Ngọc"}) == []
+    # trùng chữ đầu, hoặc thêm chữ vào sau tên thật, vẫn là bệnh viện không có trong danh mục
+    for text in ["Bệnh viện Hồng Đức có gói [ALP-CB01]", "Bệnh viện Hồng Ngọc Phúc Trường Minh có gói [ALP-CB01]"]:
+        assert check(text, **kw, known_hospitals={"Bệnh viện Hồng Ngọc"}) != [], text
+    for text in ["Bệnh viện Alpha Quốc Tế có gói [ALP-CB01]", "Bệnh viện Alpha Sài Gòn có gói [ALP-CB01]"]:
+        assert check(text, **kw, known_hospitals=HOSPITALS) != [], text
 
 
 @pytest.mark.parametrize("text", ["Bệnh viện Alpha có gói [ALP-CB01]", "Bệnh viện Đa khoa Alpha (mô phỏng) ở Hà Nội",
-    "Các bệnh viện Hà Nội có nhiều gói", "bệnh viện gần nhà bạn", "BV ALP có gói này", "Bệnh viện Gamma Đà Nẵng"])
+    "Các bệnh viện Hà Nội có nhiều gói", "bệnh viện gần nhà bạn", "BV ALP có gói này", "Bệnh viện Gamma tại Đà Nẵng"])
 def test_known_hospitals_pass(text):
     assert check(text, known_codes=CODES, allowed_amounts=PRICES, known_hospitals=HOSPITALS) == []
 
