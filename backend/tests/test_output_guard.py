@@ -59,6 +59,15 @@ def test_unknown_hospital_flagged():
                  known_hospitals=HOSPITALS) != []
 
 
+def test_hospital_names_compared_in_full():
+    # tên đăng ký có thể bắt đầu bằng "BV"; bệnh viện khác chỉ trùng chữ đầu vẫn là bệnh viện lạ
+    kw = {"known_codes": CODES, "allowed_amounts": PRICES}
+    assert check("Bệnh viện Alpha có gói [ALP-CB01]", **kw, known_hospitals={"BV Alpha"}) == []
+    assert check("Bệnh viện Hồng Đức có gói [ALP-CB01]", **kw, known_hospitals={"Bệnh viện Hồng Ngọc"}) != []
+    assert check("Bệnh viện Hồng Ngọc Phúc Trường Minh có gói [ALP-CB01]", **kw,
+                 known_hospitals={"Bệnh viện Hồng Ngọc"}) == []
+
+
 @pytest.mark.parametrize("text", ["Bệnh viện Alpha có gói [ALP-CB01]", "Bệnh viện Đa khoa Alpha (mô phỏng) ở Hà Nội",
     "Các bệnh viện Hà Nội có nhiều gói", "bệnh viện gần nhà bạn", "BV ALP có gói này", "Bệnh viện Gamma Đà Nẵng"])
 def test_known_hospitals_pass(text):

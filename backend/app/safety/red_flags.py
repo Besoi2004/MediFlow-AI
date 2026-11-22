@@ -38,6 +38,7 @@ class Pattern:
     exact: _Phrases  # từ giữ dấu
     excepts: _Phrases  # từ giữ dấu; đoạn khớp chồng lên một cụm này thì bỏ
     not_after: _Phrases  # từ giữ dấu; có trong _WINDOW từ ngay trước đoạn khớp thì bỏ
+    still_if: _Phrases  # từ giữ dấu; có trong cùng khoảng thì vẫn giữ đoạn khớp dù có not_after
 
 
 @dataclass(frozen=True)
@@ -74,7 +75,8 @@ def _phrases(items: list[str], where: str, *, accented: bool = False) -> _Phrase
 def _pattern(d: dict, where: str) -> Pattern:
     return Pattern(_phrases(d.get("phrases", []), where), _phrases(d.get("exact", []), where, accented=True),
                    _phrases(d.get("except", []), where, accented=True),
-                   _phrases(d.get("not_after", []), where, accented=True))
+                   _phrases(d.get("not_after", []), where, accented=True),
+                   _phrases(d.get("still_if", []), where, accented=True))
 
 
 def _grammar(data: dict, accented: bool) -> Grammar:
@@ -122,8 +124,13 @@ def _spans(p: Pattern, raw: list[str], norm: list[str]) -> list[tuple[int, int]]
     masked = {k for x in p.excepts for j in _starts(raw, x) for k in range(j, j + len(x))}
     spans = [(i, i + len(ph)) for words, phrases in ((norm, p.phrases), (raw, p.exact))
              for ph in phrases for i in _starts(words, ph)]
-    return [(s, e) for s, e in spans if masked.isdisjoint(range(s, e))
-            and not any(_starts(_clause_before(raw, s, _WINDOW), x) for x in p.not_after)]
+
+    def said_lightly(s: int) -> bool:  # "mệt muốn chết" là nói quá; "mệt mỏi chỉ muốn chết" thì không
+        window = _clause_before(raw, s, _WINDOW)
+        return (any(_starts(window, x) for x in p.not_after)
+                and not any(_starts(window, x) for x in p.still_if))
+
+    return [(s, e) for s, e in spans if masked.isdisjoint(range(s, e)) and not said_lightly(s)]
 
 
 def _negated(fw: list[str], s: int, g: Grammar) -> bool:
