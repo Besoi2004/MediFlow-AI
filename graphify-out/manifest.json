@@ -132,16 +132,16 @@
     "semantic_hash": "78e15e513a4c636fb5142429502447a0"
   },
   "backend/app/safety/output_guard.py": {
-    "mtime": 1795336855.4302974,
-    "seen": 1795336899.5131264,
-    "ast_hash": "30df1cd127403778aba78eb97239209d",
-    "semantic_hash": "30df1cd127403778aba78eb97239209d"
+    "mtime": 1795337185.267479,
+    "seen": 1795337238.4420652,
+    "ast_hash": "4ca9c311a44887ec30158b78e5899101",
+    "semantic_hash": "4ca9c311a44887ec30158b78e5899101"
   },
   "backend/app/safety/pii.py": {
-    "mtime": 1795335974.3637588,
-    "seen": 1795336240.648263,
-    "ast_hash": "22cbcc7e049e1a2b7fd44428907a13b8",
-    "semantic_hash": "22cbcc7e049e1a2b7fd44428907a13b8"
+    "mtime": 1795337185.1210272,
+    "seen": 1795337238.4420676,
+    "ast_hash": "072399ed353941f0e3ac03244f84ec5a",
+    "semantic_hash": "072399ed353941f0e3ac03244f84ec5a"
   },
   "backend/app/safety/red_flags.py": {
     "mtime": 1795336854.9466631,
@@ -558,22 +558,22 @@
     "semantic_hash": "a2760511c65806022ad20adf74370ff3"
   },
   "backend/tests/test_output_guard.py": {
-    "mtime": 1795336821.1902797,
-    "seen": 1795336899.5131767,
-    "ast_hash": "5be81e1f25df0874f9a1e1902e304cd3",
-    "semantic_hash": "5be81e1f25df0874f9a1e1902e304cd3"
+    "mtime": 1795337136.817413,
+    "seen": 1795337238.4421096,
+    "ast_hash": "1861255a211a0b5bc39cbed3451fd376",
+    "semantic_hash": "1861255a211a0b5bc39cbed3451fd376"
   },
   "backend/tests/test_pii.py": {
-    "mtime": 1795335870.7956035,
-    "seen": 1795336240.648316,
-    "ast_hash": "a471eb66dfea9b2e952dc74f366648b7",
-    "semantic_hash": "a471eb66dfea9b2e952dc74f366648b7"
+    "mtime": 1795337137.4535675,
+    "seen": 1795337238.4421124,
+    "ast_hash": "76b46fd813bea819d6dba708eef675ca",
+    "semantic_hash": "76b46fd813bea819d6dba708eef675ca"
   },
   "backend/tests/test_red_flags.py": {
-    "mtime": 1795336820.9619975,
-    "seen": 1795336899.5131836,
-    "ast_hash": "2e5a2ebaef1093a52f31a08c5bb2fb54",
-    "semantic_hash": "2e5a2ebaef1093a52f31a08c5bb2fb54"
+    "mtime": 1795337136.9943562,
+    "seen": 1795337238.4421144,
+    "ast_hash": "50c4826e9094cdb0250fee6e188de170",
+    "semantic_hash": "50c4826e9094cdb0250fee6e188de170"
   },
   "graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md": {
     "mtime": 1795268998.017531,
