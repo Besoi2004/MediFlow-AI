@@ -67,7 +67,8 @@ def _grammar(accented: bool) -> _Grammar:
     test = rf"(?:{alt(_ADVISE)}) (?:(?:{alt(('làm', 'đi'))}) )?{form('xét nghiệm')}\b(?!(?: [^\W_]+){{0,3}} (?:{alt(_PREP_CONTEXT)})\b)"
     return _Grammar(
         action=re.compile(rf"\b(?:{alt(FORBIDDEN_PHRASES)}|(?:{alt(_ADVISE)}) (?:{alt(_EXTRA_TESTS)})|{test})\b"),
-        assertion=re.compile(rf"\b{form('bạn')} (?:(?:{alt(_HEDGES)}) )?(?:{alt(('bị', 'mắc'))}) (?:{alt(_DISEASES)})\b"),
+        assertion=re.compile(rf"\b{form('bạn')} (?:(?:{alt(_HEDGES)}) )?(?:{alt(('bị', 'mắc'))}) "
+                             rf"(?P<disease>{alt(_DISEASES)})\b"),
         markers=tuple(tuple(form(x).split()) for x in _MARKERS),
         connectors=frozenset(form(x) for x in _CONNECTORS),
         doctor=tuple(form("bác sĩ").split()),
@@ -145,7 +146,19 @@ def _after_last_connector(words: list[str], connectors: frozenset[str]) -> list[
     return words[cuts[-1] + 1:] if cuts else words
 
 
-def _is_forbidden(sentence: str, g: _Grammar, accented: bool) -> bool:
+_GENERIC_DISEASES = {"benh", "viem", "u"}  # đã bỏ dấu; phải khớp cả chữ theo sau ("bệnh tim")
+
+
+def _restated(words: list[str], m: re.Match[str], joined: str, said: list[str]) -> bool:
+    """Bệnh trong "bạn bị <bệnh>" khách đã tự kể (said: các tin của khách, đã bỏ dấu): nhắc lại, không phải chẩn đoán."""
+    d = joined[:m.start("disease")].count(" ")
+    term = [normalize_vi(w) for w in words[d:d + len(m["disease"].split())]]
+    if " ".join(term) in _GENERIC_DISEASES:
+        term += [normalize_vi(w) for w in words[d + len(term):d + len(term) + 1]]
+    return _contains(said, tuple(term))
+
+
+def _is_forbidden(sentence: str, g: _Grammar, accented: bool, said: list[str]) -> bool:
     if _DOSAGE.search(sentence.lower()):
         return True
     question = sentence.rstrip().endswith("?")
@@ -160,17 +173,18 @@ def _is_forbidden(sentence: str, g: _Grammar, accented: bool) -> bool:
         for m in [] if question else g.assertion.finditer(joined):
             i = joined[:m.start()].count(" ")
             window = _after_last_connector(words[max(0, i - 3):i], g.connectors)
-            if not any(_contains(window, mk) for mk in g.markers):
+            if not any(_contains(window, mk) for mk in g.markers) and not _restated(words, m, joined, said):
                 return True
         seen += words
     return False
 
 
-def _forbidden_sentences(text: str) -> list[str]:
+def _forbidden_sentences(text: str, customer_text: str) -> list[str]:
     accented = has_vi_marks(text)
     g = _GRAMMAR[accented]
+    said = normalize_vi(customer_text).split()
     sentences = _SENTENCE_BREAK.split(_BULLET.sub("; ", text))
-    return [s.strip() for s in sentences if s.strip() and _is_forbidden(s, g, accented)]
+    return [s.strip() for s in sentences if s.strip() and _is_forbidden(s, g, accented, said)]
 
 
 def _strip_descriptors(tokens: list[str]) -> list[str]:
@@ -217,8 +231,11 @@ def _unknown_hospitals(text: str, known_hospitals: set[str]) -> list[str]:
 
 
 def check(text: str, *, known_codes: set[str], allowed_amounts: set[int],
-          known_hospitals: set[str] = frozenset()) -> list[str]:
-    """Danh sách lỗi bằng tiếng Việt; rỗng là đạt. known_hospitals: tên và mã bệnh viện; rỗng thì không kiểm."""
+          known_hospitals: set[str] = frozenset(), customer_text: str = "") -> list[str]:
+    """Danh sách lỗi bằng tiếng Việt; rỗng là đạt. known_hospitals: tên và mã bệnh viện; rỗng thì không kiểm.
+
+    customer_text: các tin của khách trong hội thoại; bệnh khách tự kể thì "Vì bạn bị cao huyết áp, ..." được phép.
+    """
     known = {c.upper() for c in known_codes}
     # Mã trong [...] luôn bị kiểm; mã không có ngoặc chỉ bị kiểm khi tiền tố là bệnh viện có thật,
     # để tên xét nghiệm như "HPV-DNA" hay tag "tim-mach" không bị coi là mã gói.
@@ -229,5 +246,5 @@ def check(text: str, *, known_codes: set[str], allowed_amounts: set[int],
     if known_hospitals:
         problems += [f"Bệnh viện không có trong danh mục: {h}" for h in _unknown_hospitals(text, known_hospitals)]
     problems += [f"Số tiền không khớp giá gói nào: {n}" for n in sorted(find_amounts(text) - allowed_amounts)]
-    problems += [f"Câu có dạng chẩn đoán hoặc kê đơn: '{s}'" for s in _forbidden_sentences(text)]
+    problems += [f"Câu có dạng chẩn đoán hoặc kê đơn: '{s}'" for s in _forbidden_sentences(text, customer_text)]
     return problems
