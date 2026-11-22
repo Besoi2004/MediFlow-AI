@@ -6,6 +6,8 @@
 negations: [không, chưa, chưa từng, không hề, hết, không còn]
 # Cụm bắt đầu bằng từ phủ định nhưng không phủ định triệu chứng theo sau ("hết sức khó thở").
 not_negations: [hết sức, không chỉ, không hiểu sao, không biết sao]
+# Từ nối: phủ định đứng trước từ này không phủ định phần sau ("không đau nhưng khó thở"). Mỗi mục một từ.
+connectors: [nhưng, mà, nên, thì]
 
 rules:
   - id: dau_nguc

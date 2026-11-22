@@ -1,9 +1,14 @@
-import pytest
+from pathlib import Path
 
+import pytest
+import yaml
+
+from app.safety import red_flags
 from app.safety.red_flags import (
     EMERGENCY_MESSAGE,
     SEE_DOCTOR_NOTE,
     SYMPTOM_CODES,
+    _load,
     detect,
     evaluate_codes,
     worst,
@@ -28,6 +33,8 @@ def test_normalize_vi(raw, norm):
     # có từ phủ định nhưng không phủ định triệu chứng theo sau
     ("tôi hết sức khó thở", "kho_tho"), ("không chỉ đau ngực mà còn vã mồ hôi", "dau_nguc"),
     ("không hiểu sao đau ngực quá", "dau_nguc"),
+    # phủ định đứng trước từ nối ("nhưng", "mà") không phủ định phần sau
+    ("tôi không đau nhưng khó thở", "kho_tho"), ("không sốt mà ho ra máu", "xuat_huyet"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)
@@ -68,6 +75,23 @@ def test_evaluate_codes_and_symptom_codes():
     assert worst(evaluate_codes(["sut_can", "ma_la"])) == "see_doctor"
     assert worst(evaluate_codes(["kho_tho"])) == "emergency"
     assert evaluate_codes([]) == [] and worst([]) is None
+
+
+def test_every_yaml_phrase_matches_itself():
+    # cụm nào trong YAML cũng phải bắt được chính nó; bắt lỗi tách từ hoặc gõ cụm không thể khớp
+    data = yaml.safe_load(Path(red_flags.__file__).with_name("red_flags.yaml").read_text(encoding="utf-8"))
+    for rule in data["rules"]:
+        for phrase in rule["phrases"] + rule.get("exact", []):
+            assert rule["id"] in {h.rule_id for h in detect(phrase)}, phrase
+
+
+def test_empty_yaml_phrase_is_rejected(tmp_path):
+    # cụm phủ định rỗng khớp ở mọi vị trí và sẽ tắt hết cờ đỏ, nên phải báo lỗi ngay lúc nạp
+    bad = tmp_path / "red_flags.yaml"
+    bad.write_text('negations: [không, "!!!"]\nrules:\n'
+                   '  - {id: x, severity: emergency, symptom_code: x, phrases: [đau ngực]}\n', encoding="utf-8")
+    with pytest.raises(ValueError):
+        _load(bad)
 
 
 def test_messages_are_fixed_vietnamese():

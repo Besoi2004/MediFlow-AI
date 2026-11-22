@@ -19,6 +19,8 @@ _FORBIDDEN_WORDS = tuple(p.split() for p in FORBIDDEN_PHRASES)
 # Có một từ này trong 3 từ ngay trước (cùng vế câu) thì không phải lời khẳng định:
 # "không thể kê đơn" là từ chối, "nếu bạn bị bệnh X" là giả định.
 _NOT_A_CLAIM = {"khong", "chua", "neu"}
+# Từ nối chặn tác dụng của các từ trên: "chưa rõ nhưng bạn bị bệnh X" vẫn là lời khẳng định.
+_CONNECTORS = {"nhung", "ma", "nen", "thi"}
 _CLAUSE_BREAK = re.compile(r"[,.;:!?\n]+")
 
 _CODE = r"[A-Za-z]{3}-[A-Za-z0-9]{2,}"
@@ -66,8 +68,13 @@ def find_amounts(text: str) -> set[int]:
 
 def _is_claim(words: list[str], phrase: list[str]) -> bool:
     n = len(phrase)
-    return any(words[i:i + n] == phrase and not _NOT_A_CLAIM & set(words[max(0, i - 3):i])
-               for i in range(len(words) - n + 1))
+    for i in range(len(words) - n + 1):
+        if words[i:i + n] == phrase:
+            before = words[max(0, i - 3):i]
+            cuts = [k for k, w in enumerate(before) if w in _CONNECTORS]
+            if not _NOT_A_CLAIM & set(before[cuts[-1] + 1:] if cuts else before):
+                return True
+    return False
 
 
 def _forbidden_clauses(text: str) -> list[str]:

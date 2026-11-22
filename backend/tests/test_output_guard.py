@@ -55,7 +55,8 @@ def test_lowercase_code_checked():                                       # Revie
 
 @pytest.mark.parametrize("text", ["Bạn bị bệnh tiểu đường rồi", "Chẩn đoán là viêm gan", "Bạn nên uống thuốc hạ áp",
     "Mình kê đơn cho bạn", "Bạn nên làm thêm xét nghiệm PSA",
-    "Không sao đâu, bạn bị bệnh nhẹ thôi"])  # "không" ở vế trước không làm câu sau thành lời từ chối
+    "Không sao đâu, bạn bị bệnh nhẹ thôi",  # "không" ở vế trước không làm câu sau thành lời từ chối
+    "Kết quả chưa rõ nhưng bạn bị bệnh tiểu đường"])  # từ nối "nhưng" chặn phủ định lại
 def test_forbidden(text):
     assert check(text, known_codes=CODES, allowed_amounts=PRICES) != []
 
