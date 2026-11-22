@@ -132,16 +132,16 @@
     "semantic_hash": "78e15e513a4c636fb5142429502447a0"
   },
   "backend/app/safety/output_guard.py": {
-    "mtime": 1795337185.267479,
-    "seen": 1795337238.4420652,
-    "ast_hash": "4ca9c311a44887ec30158b78e5899101",
-    "semantic_hash": "4ca9c311a44887ec30158b78e5899101"
+    "mtime": 1795363283.952527,
+    "seen": 1795363653.2180674,
+    "ast_hash": "b551190e6b84089daf39f1688c73ecbf",
+    "semantic_hash": "b551190e6b84089daf39f1688c73ecbf"
   },
   "backend/app/safety/pii.py": {
-    "mtime": 1795354373.5310526,
-    "seen": 1795354428.7349198,
-    "ast_hash": "80229eb01240494604e57ea58fa5f443",
-    "semantic_hash": "80229eb01240494604e57ea58fa5f443"
+    "mtime": 1795363404.9374707,
+    "seen": 1795363653.2180703,
+    "ast_hash": "b605289014f70eb795f9ad7f4d0a1827",
+    "semantic_hash": "b605289014f70eb795f9ad7f4d0a1827"
   },
   "backend/app/safety/red_flags.py": {
     "mtime": 1795361696.1535983,
@@ -150,10 +150,10 @@
     "semantic_hash": "ab4f53addda99568f87a67dab6dadd12"
   },
   "backend/app/safety/red_flags.yaml": {
-    "mtime": 1795362098.5760515,
-    "seen": 1795362145.8476899,
-    "ast_hash": "a5f95f5364b9afea51ca7ff661ad70cb",
-    "semantic_hash": "a5f95f5364b9afea51ca7ff661ad70cb"
+    "mtime": 1795363179.4653773,
+    "seen": 1795363653.2180753,
+    "ast_hash": "f0f7183846a6d9a073d908c0336b7fc0",
+    "semantic_hash": "f0f7183846a6d9a073d908c0336b7fc0"
   },
   "backend/app/schemas.py": {
     "mtime": 1795266684.9583127,
@@ -492,10 +492,10 @@
     "semantic_hash": "51d8e73f188f8062239e71f1170d4ca1"
   },
   "docs/superpowers/plans/2026-11-21-plan-4-agent.md": {
-    "mtime": 1795336106.3315506,
-    "seen": 1795336240.6483989,
-    "ast_hash": "c1d8c8a0d8c2b22669372a668c76c325",
-    "semantic_hash": "c1d8c8a0d8c2b22669372a668c76c325"
+    "mtime": 1795363492.0047474,
+    "seen": 1795363653.2182076,
+    "ast_hash": "182159232aa35beae29ddd7495ab7377",
+    "semantic_hash": "182159232aa35beae29ddd7495ab7377"
   },
   "docs/superpowers/plans/2026-11-21-plan-5-tro-ly-tren-giao-dien.md": {
     "mtime": 1795268100.2389476,
@@ -510,10 +510,10 @@
     "semantic_hash": "2587228fae6c8bc58608a15002760219"
   },
   "docs/superpowers/specs/2026-11-21-mediflow-ai-design.md": {
-    "mtime": 1795268194.8440976,
-    "seen": 1795268844.5501294,
-    "ast_hash": "8d3645d9a2cdcd83378e1497b3a879f6",
-    "semantic_hash": "8d3645d9a2cdcd83378e1497b3a879f6"
+    "mtime": 1795363502.4911697,
+    "seen": 1795363653.2182102,
+    "ast_hash": "579d11ec1bdeea12f06d31f8d134faa8",
+    "semantic_hash": "579d11ec1bdeea12f06d31f8d134faa8"
   },
   "frontend/AGENTS.md": {
     "mtime": 1795266684.994768,
@@ -558,22 +558,22 @@
     "semantic_hash": "a2760511c65806022ad20adf74370ff3"
   },
   "backend/tests/test_output_guard.py": {
-    "mtime": 1795337136.817413,
-    "seen": 1795337238.4421096,
-    "ast_hash": "1861255a211a0b5bc39cbed3451fd376",
-    "semantic_hash": "1861255a211a0b5bc39cbed3451fd376"
+    "mtime": 1795363447.045201,
+    "seen": 1795363653.2181232,
+    "ast_hash": "1e2c15718c7d5a12ea486d84f5528f15",
+    "semantic_hash": "1e2c15718c7d5a12ea486d84f5528f15"
   },
   "backend/tests/test_pii.py": {
-    "mtime": 1795361668.8314235,
-    "seen": 1795361760.1306276,
-    "ast_hash": "d346c55f764a9d150bf9a8acdafe1581",
-    "semantic_hash": "d346c55f764a9d150bf9a8acdafe1581"
+    "mtime": 1795363359.1619296,
+    "seen": 1795363653.2181256,
+    "ast_hash": "d5c6e6310dd3f9176c2efa9c972d5e4f",
+    "semantic_hash": "d5c6e6310dd3f9176c2efa9c972d5e4f"
   },
   "backend/tests/test_red_flags.py": {
-    "mtime": 1795362078.66134,
-    "seen": 1795362145.8477244,
-    "ast_hash": "db0f472434a1a799dcd9ae9043c61c34",
-    "semantic_hash": "db0f472434a1a799dcd9ae9043c61c34"
+    "mtime": 1795362939.8490224,
+    "seen": 1795363653.218128,
+    "ast_hash": "65ec305117dfe6f25ef07dd4bb2ac5ad",
+    "semantic_hash": "65ec305117dfe6f25ef07dd4bb2ac5ad"
   },
   "graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md": {
     "mtime": 1795268998.017531,
@@ -586,5 +586,11 @@
     "seen": 1795331530.739998,
     "ast_hash": "23613c3efe387efa7854707bea0331f0",
     "semantic_hash": "23613c3efe387efa7854707bea0331f0"
+  },
+  "backend/tests/red_flag_messages.yaml": {
+    "mtime": 1795363196.9634674,
+    "seen": 1795363653.2181098,
+    "ast_hash": "d604a1cb52c3efe21b3153ef22486d5a",
+    "semantic_hash": "d604a1cb52c3efe21b3153ef22486d5a"
   }
 }
