@@ -18,7 +18,9 @@ EMERGENCY_MESSAGE = (
 SEE_DOCTOR_NOTE = "Triệu chứng bạn kể nên được bác sĩ chuyên khoa khám sớm, thay vì chỉ chờ khám sức khỏe định kỳ."
 
 _GAP = 2  # số từ tối đa giữa cụm phủ định và triệu chứng: "không bị đau ngực", "không có triệu chứng khó thở"
-_CLAUSE_BREAK = re.compile(r"[,.;:!?\n]+")
+_WINDOW = 3  # số từ trước triệu chứng xét not_after ("sợ lấy máu muốn chết")
+_SENTENCE_BREAK = re.compile(r"[.;:!?\n]+")
+_COMMA = ","  # giữ dấu phẩy thành một từ trong câu: chặn phủ định, nhưng nối được danh sách "A, B hay C"
 _YAML = Path(__file__).with_name("red_flags.yaml")
 _Phrases = tuple[tuple[str, ...], ...]
 
@@ -35,6 +37,7 @@ class Pattern:
     phrases: _Phrases  # từ đã bỏ dấu
     exact: _Phrases  # từ giữ dấu
     excepts: _Phrases  # từ giữ dấu; đoạn khớp chồng lên một cụm này thì bỏ
+    not_after: _Phrases  # từ giữ dấu; có trong _WINDOW từ ngay trước đoạn khớp thì bỏ
 
 
 @dataclass(frozen=True)
@@ -70,7 +73,8 @@ def _phrases(items: list[str], where: str, *, accented: bool = False) -> _Phrase
 
 def _pattern(d: dict, where: str) -> Pattern:
     return Pattern(_phrases(d.get("phrases", []), where), _phrases(d.get("exact", []), where, accented=True),
-                   _phrases(d.get("except", []), where, accented=True))
+                   _phrases(d.get("except", []), where, accented=True),
+                   _phrases(d.get("not_after", []), where, accented=True))
 
 
 def _grammar(data: dict, accented: bool) -> Grammar:
@@ -94,6 +98,10 @@ def _load(path: Path = _YAML) -> tuple[tuple[Rule, ...], dict[bool, Grammar]]:
             raise ValueError(f"red_flags.yaml: severity lạ ở luật {r['id']}: {r['severity']}")
         rules.append(Rule(r["id"], r["severity"], r["symptom_code"], _pattern(r, r["id"]),
                           tuple(_pattern(g, r["id"]) for g in r.get("all_of", []))))
+    for key in ("id", "symptom_code"):  # trùng symptom_code thì evaluate_codes chỉ giữ một luật
+        values = [r[key] for r in data["rules"]]
+        if dup := sorted({v for v in values if values.count(v) > 1}):
+            raise ValueError(f"red_flags.yaml: {key} bị trùng: {dup}")
     return tuple(rules), {True: _grammar(data, True), False: _grammar(data, False)}
 
 
@@ -103,39 +111,56 @@ SYMPTOM_CODES: tuple[str, ...] = tuple(r.symptom_code for r in RULES)
 _PATTERNS = [((r.id, -1), r.pattern) for r in RULES] + [((r.id, k), p) for r in RULES for k, p in enumerate(r.all_of)]
 
 
+def _clause_before(words: list[str], s: int, size: int) -> list[str]:
+    """Tối đa size từ ngay trước s, không vượt qua dấu phẩy."""
+    before = words[max(0, s - size):s]
+    return before[len(before) - before[::-1].index(_COMMA):] if _COMMA in before else before
+
+
 def _spans(p: Pattern, raw: list[str], norm: list[str]) -> list[tuple[int, int]]:
-    """Các đoạn [đầu, cuối) khớp cụm của p, trừ đoạn chồng lên một cụm loại trừ."""
+    """Các đoạn [đầu, cuối) khớp cụm của p, trừ đoạn chồng lên cụm loại trừ hoặc đứng sau từ not_after."""
     masked = {k for x in p.excepts for j in _starts(raw, x) for k in range(j, j + len(x))}
     spans = [(i, i + len(ph)) for words, phrases in ((norm, p.phrases), (raw, p.exact))
              for ph in phrases for i in _starts(words, ph)]
-    return [(s, e) for s, e in spans if masked.isdisjoint(range(s, e))]
+    return [(s, e) for s, e in spans if masked.isdisjoint(range(s, e))
+            and not any(_starts(_clause_before(raw, s, _WINDOW), x) for x in p.not_after)]
 
 
 def _negated(fw: list[str], s: int, g: Grammar) -> bool:
-    """Có cụm phủ định kết thúc cách s tối đa _GAP từ, không bị từ nối chặn, không phải cụm như "hết sức"."""
+    """Có cụm phủ định kết thúc cách s tối đa _GAP từ, không bị từ nối hay dấu phẩy chặn, không phải cụm như "hết sức"."""
     lo = max(0, s - _GAP - max(map(len, g.negations)))  # chỉ xét vài từ ngay trước s, để chạy tuyến tính
     for neg in g.negations:
         for j in (lo + k for k in _starts(fw[lo:s], neg)):
             end = j + len(neg)
-            if (s - end <= _GAP and g.connectors.isdisjoint(fw[end:s])
+            between = fw[end:s]
+            if (s - end <= _GAP and _COMMA not in between and g.connectors.isdisjoint(between)
                     and not any(tuple(fw[j:j + len(x)]) == x for x in g.not_negations)):
                 return True
     return False
+
+
+def _sentence_words(sentence: str) -> list[str]:
+    raw: list[str] = []
+    for k, part in enumerate(sentence.split(_COMMA)):
+        raw += ([_COMMA] if k else []) + words_vi(part)
+    return raw
 
 
 def detect(text: str) -> list[Hit]:
     accented = has_vi_marks(text)
     g = GRAMMAR[accented]
     found: dict[tuple[str, int], str] = {}  # (id luật, nhóm) -> cụm đầu tiên không bị phủ định
-    # Xét từng vế câu: "Không, tôi đau ngực" thì "không" không phủ định "đau ngực"
-    for clause in _CLAUSE_BREAK.split(text):
-        raw = words_vi(clause)
-        norm = [normalize_vi(w) for w in raw]
+    for sentence in _SENTENCE_BREAK.split(text):
+        raw = _sentence_words(sentence)
+        norm = [w if w == _COMMA else normalize_vi(w) for w in raw]
         fw = raw if accented else norm
+        last_coordinator = max((k for k, w in enumerate(fw) if w in g.coordinators), default=-1)
         negated_ends: set[int] = set()
         for s, e, key in sorted((s, e, key) for key, p in _PATTERNS for s, e in _spans(p, raw, norm)):
-            # triệu chứng liệt kê sau "hay/hoặc/và" nhận phủ định của triệu chứng ngay trước
-            listed = s > 0 and fw[s - 1] in g.coordinators and s - 1 in negated_ends
+            # triệu chứng liệt kê sau "hay/hoặc/và" (hoặc sau dấu phẩy trong danh sách khép bằng các từ đó)
+            # nhận phủ định của triệu chứng ngay trước: "không đau ngực, khó thở hay ngất"
+            prev = fw[s - 1] if s > 0 else None
+            listed = s - 1 in negated_ends and (prev in g.coordinators or (prev == _COMMA and last_coordinator > s))
             if listed or _negated(fw, s, g):
                 negated_ends.add(e)
             else:

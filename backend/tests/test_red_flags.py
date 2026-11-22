@@ -47,6 +47,10 @@ def test_normalize_vi(raw, norm):
     ("đau giống hệt đau ngực lần trước", "dau_nguc"), ("Cha tôi đau ngực", "dau_nguc"),
     ("Không những đau ngực, tôi còn mệt", "dau_nguc"), ("chưa kể đau ngực từ tối qua", "dau_nguc"),
     ("Không ngờ bị đau ngực dữ vậy", "dau_nguc"),
+    # dấu phẩy không nối danh sách phủ định khi không có "hay/hoặc/và" khép lại
+    ("Tôi không đau ngực, khó thở lắm", "kho_tho"), ("không đau nhưng mà khó thở", "kho_tho"),
+    # "muốn chết" sau từ cảm xúc thật thì vẫn báo
+    ("Tôi buồn muốn chết", "tu_tu"), ("đau khổ muốn chết", "tu_tu"), ("tôi mệt mỏi, muốn chết", "tu_tu"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)
@@ -71,7 +75,11 @@ def test_see_doctor_detected(text):
     # câu phủ nhận khi trả lời câu hỏi sàng lọc
     "Tôi không đau ngực hay khó thở gì cả", "Tôi không có triệu chứng đau ngực hay khó thở",
     "Không có dấu hiệu khó thở", "Tôi chưa bao giờ bị đau ngực", "Tôi không bao giờ bị khó thở",
-    "Tôi chẳng đau ngực gì cả", "Tôi chả khó thở gì"])
+    "Tôi chẳng đau ngực gì cả", "Tôi chả khó thở gì",
+    # phủ định áp cho cả danh sách "A, B hay C"
+    "Tôi không đau ngực, khó thở hay ngất", "Tôi không bị đau ngực, khó thở, hay chóng mặt gì",
+    # nói quá
+    "Tôi sợ lấy máu muốn chết", "trời nóng muốn chết", "mệt muốn chết luôn"])
 def test_no_false_alarm(text):
     assert detect(text) == []
 
@@ -124,12 +132,25 @@ def test_worst_accepts_severities():
     assert worst([None, "see_doctor"]) == "see_doctor" and worst([None]) is None
 
 
-def test_empty_yaml_phrase_is_rejected(tmp_path):
-    # cụm phủ định rỗng khớp ở mọi vị trí và sẽ tắt hết cờ đỏ, nên phải báo lỗi ngay lúc nạp
+_RULE = "  - {id: x, severity: emergency, symptom_code: x, phrases: [đau ngực]}\n"
+
+
+@pytest.mark.parametrize("yaml_text,error", [
+    # cụm rỗng khớp ở mọi vị trí: phủ định rỗng tắt hết cờ đỏ, cụm triệu chứng rỗng báo cấp cứu mọi tin nhắn
+    ('negations: [không, "!!!"]\nrules:\n' + _RULE, "cụm rỗng"),
+    ('negations: [không]\nrules:\n  - {id: x, severity: emergency, symptom_code: x, phrases: [đau ngực, "..."]}\n',
+     "cụm rỗng"),
+    ('negations: [không]\nrules:\n  - {id: x, severity: emergency, symptom_code: x, phrases: [ho], exact: ["?"]}\n',
+     "cụm rỗng"),
+    # trùng symptom_code thì evaluate_codes chỉ giữ một luật, có thể mất luật cấp cứu
+    ("negations: [không]\nrules:\n" + _RULE + "  - {id: y, severity: see_doctor, symptom_code: x, phrases: [ho]}\n",
+     "trùng"),
+    ("negations: [không]\nconnectors: [nhưng mà]\nrules:\n" + _RULE, "một từ"),
+])
+def test_bad_yaml_is_rejected(tmp_path, yaml_text, error):
     bad = tmp_path / "red_flags.yaml"
-    bad.write_text('negations: [không, "!!!"]\nrules:\n'
-                   '  - {id: x, severity: emergency, symptom_code: x, phrases: [đau ngực]}\n', encoding="utf-8")
-    with pytest.raises(ValueError):
+    bad.write_text(yaml_text, encoding="utf-8")
+    with pytest.raises(ValueError, match=error):
         _load(bad)
 
 
