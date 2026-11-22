@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayKeyVN, formatDateTimeVN, formatDayVN, formatVnd, groupSlotsByDay, maxFastingHours, toggleCode } from "./format";
+import { dayKeyVN, formatAudience, formatDateTimeVN, formatDayVN, formatVnd, groupSlotsByDay, maxFastingHours, prepLines, toggleCode } from "./format";
 
 describe("format", () => {
   it("formats VND", () => { expect(formatVnd(1200000)).toBe("1.200.000đ"); expect(formatVnd(990000)).toBe("990.000đ"); });
@@ -20,4 +20,15 @@ describe("format", () => {
     expect(toggleCode(["A", "B", "C"], "D")).toEqual(["A", "B", "C"]);
   });
   it("max fasting hours", () => { expect(maxFastingHours([{ fasting_hours: 0 }, { fasting_hours: 8 }, { fasting_hours: 6 }])).toBe(8); expect(maxFastingHours([])).toBe(0); });
+  it("describes who a package is for", () => {
+    expect(formatAudience({ gender_scope: "male", age_min: 30, age_max: null })).toBe("Nam, từ 30 tuổi");
+    expect(formatAudience({ gender_scope: "any", age_min: 18, age_max: 45 })).toBe("Nam và nữ, 18–45 tuổi");
+  });
+  it("lists prep lines with fasting first and no repeats", () => {
+    const item = (fasting_hours: number, prep_instruction: string) => ({ fasting_hours, prep_instruction });
+    expect(prepLines([item(8, ""), item(0, "Mang kính"), item(6, "Nhịn tiểu"), item(0, "Mang kính")])).toEqual([
+      "Nhịn ăn ít nhất 8 tiếng trước giờ khám (được uống nước lọc)", "Mang kính", "Nhịn tiểu",
+    ]);
+    expect(prepLines([item(0, ""), item(0, "Mang kính")])).toEqual(["Mang kính"]);
+  });
 });

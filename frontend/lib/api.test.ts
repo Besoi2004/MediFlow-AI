@@ -18,9 +18,13 @@ describe("api", () => {
     reply(409, { detail: "Khung giờ đã hết chỗ" });
     await expect(api("/bookings", { method: "POST", json: {} })).rejects.toMatchObject({ status: 409, message: "Khung giờ đã hết chỗ" });
   });
-  it("falls back when the error body is not JSON", async () => {
+  it("treats a 5xx without JSON as the server being unreachable", async () => {  // Review Focus 1: backend tắt thì rewrites của Next trả 500 dạng chữ
     vi.stubGlobal("fetch", vi.fn(async () => new Response("Internal Server Error", { status: 500 })));
-    await expect(api("/packages")).rejects.toMatchObject({ status: 500, message: "Có lỗi xảy ra" });
+    await expect(api("/packages")).rejects.toMatchObject({ status: 500, message: "Không kết nối được máy chủ, vui lòng thử lại" });
+  });
+  it("falls back when a 4xx body is not JSON", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("Not Found", { status: 404 })));
+    await expect(api("/packages")).rejects.toMatchObject({ status: 404, message: "Có lỗi xảy ra" });
   });
   it("turns network failure into a Vietnamese error", async () => {   // Review Focus 1
     vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("Failed to fetch"); }));

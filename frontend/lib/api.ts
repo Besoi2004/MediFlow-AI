@@ -11,6 +11,8 @@ export class ApiError extends Error {
   }
 }
 
+const UNREACHABLE = "Không kết nối được máy chủ, vui lòng thử lại";
+
 export async function api<T>(
   path: string,
   opts: { method?: string; json?: unknown; signal?: AbortSignal } = {},
@@ -26,13 +28,15 @@ export async function api<T>(
     });
   } catch (e) {
     if (opts.signal?.aborted) throw e; // component đã rời trang, không phải lỗi mạng
-    throw new ApiError(0, "Không kết nối được máy chủ, vui lòng thử lại");
+    throw new ApiError(0, UNREACHABLE);
   }
   if (res.status === 204) return undefined as T;
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const errors: { field: string; message: string }[] = body?.errors ?? [];
-    const detail = typeof body?.detail === "string" ? body.detail : "Có lỗi xảy ra";
+    // Backend tắt thì rewrites của Next trả 500 dạng chữ, không phải lỗi mạng
+    const fallback = res.status >= 500 && body === null ? UNREACHABLE : "Có lỗi xảy ra";
+    const detail = typeof body?.detail === "string" ? body.detail : fallback;
     throw new ApiError(res.status, detail, Object.fromEntries(errors.map((e) => [e.field, e.message])));
   }
   return body as T;

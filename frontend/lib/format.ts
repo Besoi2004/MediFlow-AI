@@ -57,3 +57,17 @@ export function toggleCode(codes: string[], code: string, max = 3): string[] {
 export function maxFastingHours(items: { fasting_hours: number }[]): number {
   return Math.max(0, ...items.map((i) => i.fasting_hours));
 }
+
+const GENDER_SCOPE: Record<string, string> = { any: "Nam và nữ", male: "Nam", female: "Nữ" };
+
+export function formatAudience(p: { gender_scope: string; age_min: number; age_max: number | null }): string {
+  const age = p.age_max === null ? `từ ${p.age_min} tuổi` : `${p.age_min}–${p.age_max} tuổi`;
+  return `${GENDER_SCOPE[p.gender_scope]}, ${age}`;
+}
+
+// Khối "Chuẩn bị trước khám": dòng nhịn ăn (giờ dài nhất) lên đầu, rồi các hướng dẫn khác, bỏ trùng.
+export function prepLines(items: { fasting_hours: number; prep_instruction: string }[]): string[] {
+  const hours = maxFastingHours(items);
+  const fasting = hours > 0 ? [`Nhịn ăn ít nhất ${hours} tiếng trước giờ khám (được uống nước lọc)`] : [];
+  return [...new Set([...fasting, ...items.map((i) => i.prep_instruction.trim()).filter(Boolean)])];
+}
