@@ -4,6 +4,8 @@
 #   "nói khó"/"nỗi khổ"), nên phải gõ đúng dấu mới bắt. Gõ không dấu thì để lớp 2 (check_symptoms) bắt.
 # Phủ định: bỏ qua lần khớp nếu 3 từ ngay trước (trong cùng vế câu) có một cụm dưới đây.
 negations: [không, chưa, chưa từng, không hề, hết, không còn]
+# Cụm bắt đầu bằng từ phủ định nhưng không phủ định triệu chứng theo sau ("hết sức khó thở").
+not_negations: [hết sức, không chỉ, không hiểu sao, không biết sao]
 
 rules:
   - id: dau_nguc

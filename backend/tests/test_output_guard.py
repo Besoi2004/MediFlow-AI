@@ -20,6 +20,20 @@ def test_not_amounts(text):
     assert find_amounts(text) == set()
 
 
+def test_compound_amounts():
+    # phần lẻ sau "triệu" là phần lẻ của triệu, trừ khi có "nghìn" đi kèm
+    assert find_amounts("tầm 1tr5") == {1_500_000}
+    assert find_amounts("2 triệu 500 nghìn") == {2_500_000}
+    assert find_amounts("2 triệu 50 nghìn") == {2_050_000}
+
+
+def test_code_check_needs_brackets_or_known_hospital():
+    # tên xét nghiệm và tag dạng slug không phải mã gói
+    assert check("Gói có HPV-DNA, non-HDL, thuộc nhóm tim-mach", known_codes=CODES, allowed_amounts=PRICES) == []
+    # mã trong [...] luôn bị kiểm, kể cả tiền tố bệnh viện lạ
+    assert check("Gói [XYZ-VIP] rất tốt", known_codes=CODES, allowed_amounts=PRICES) != []
+
+
 def test_find_codes():
     assert find_package_codes("Gói [ALP-CB01] và alp-tim, xét nghiệm SA-BUNG, KHAM-NOI") == {"ALP-CB01", "ALP-TIM"}
 

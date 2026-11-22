@@ -15,22 +15,39 @@ FORBIDDEN_PHRASES = (
     "ban bi benh", "ban mac benh", "chan doan la", "chan doan cua ban", "ban bi ung thu",
     "nen uong thuoc", "hay uong thuoc", "ke don", "lieu dung", "ban nen lam them xet nghiem",
 )
+_FORBIDDEN_WORDS = tuple(p.split() for p in FORBIDDEN_PHRASES)
 # Có một từ này trong 3 từ ngay trước (cùng vế câu) thì không phải lời khẳng định:
 # "không thể kê đơn" là từ chối, "nếu bạn bị bệnh X" là giả định.
 _NOT_A_CLAIM = {"khong", "chua", "neu"}
 _CLAUSE_BREAK = re.compile(r"[,.;:!?\n]+")
 
-# shortcut: bắt cả tên xét nghiệm dạng "HPV-16"; nếu LLM hay viết vậy thì chỉ bắt mã nằm trong [...]
-_PACKAGE_CODE = re.compile(r"(?<![\w-])[A-Za-z]{3}-[A-Za-z0-9]{2,}")
+_CODE = r"[A-Za-z]{3}-[A-Za-z0-9]{2,}"
+_PACKAGE_CODE = re.compile(rf"(?<![\w-]){_CODE}")
+_BRACKETED_CODE = re.compile(rf"\[({_CODE})\]")
 
 _NUM = r"(?<![\d.,])(\d+(?:[.,]\d+)?)\s*"
+_MILLION = r"(?:triệu|trieu|tr|củ)"
+_THOUSAND = r"(?:k|nghìn|nghin|ngàn)"
+
+
+def _decimal(n: str) -> Decimal:
+    return Decimal(n.replace(",", "."))
+
+
+def _compound(m: re.Match[str]) -> Decimal | int:
+    """'1tr5' = 1.500.000; '2 triệu 50 nghìn' = 2.050.000."""
+    if m[3]:
+        return int(m[1]) * 1_000_000 + int(m[2]) * 1_000
+    return Decimal(f"{m[1]}.{m[2]}") * 1_000_000
+
+
 # Thử theo thứ tự; đoạn đã lấy được xóa đi để không đếm lại.
-# shortcut: "2 triệu 500 nghìn" thành hai số 2.000.000 và 500.000; LLM được dặn ghi giá đúng như tool trả.
 _AMOUNT_PATTERNS = (
-    (re.compile(_NUM + r"(?:triệu|trieu|tr|củ)(?!\w)"), lambda n: Decimal(n.replace(",", ".")) * 1_000_000),
-    (re.compile(_NUM + r"(?:k|nghìn|nghin|ngàn)(?!\w)"), lambda n: Decimal(n.replace(",", ".")) * 1_000),
-    (re.compile(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{3})+)(?![.,]?\d)"), lambda n: int(re.sub(r"\D", "", n))),
-    (re.compile(r"(?<![\d.,])(\d{4,})\s*(?:đồng|dong|vnđ|vnd|đ|₫)(?!\w)"), int),
+    (re.compile(rf"(?<![\d.,])(\d+)\s*{_MILLION}\s*(\d{{1,3}})(\s*{_THOUSAND})?(?!\w)"), _compound),
+    (re.compile(_NUM + _MILLION + r"(?!\w)"), lambda m: _decimal(m[1]) * 1_000_000),
+    (re.compile(_NUM + _THOUSAND + r"(?!\w)"), lambda m: _decimal(m[1]) * 1_000),
+    (re.compile(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{3})+)(?![.,]?\d)"), lambda m: int(re.sub(r"\D", "", m[1]))),
+    (re.compile(r"(?<![\d.,])(\d{4,})\s*(?:đồng|dong|vnđ|vnd|đ|₫)(?!\w)"), lambda m: int(m[1])),
 )
 
 
@@ -42,7 +59,7 @@ def find_amounts(text: str) -> set[int]:
     s = unicodedata.normalize("NFC", text.lower())
     found: set[int] = set()
     for pattern, parse in _AMOUNT_PATTERNS:
-        found |= {int(parse(n)) for n in pattern.findall(s)}
+        found |= {int(parse(m)) for m in pattern.finditer(s)}
         s = pattern.sub(lambda m: " " * len(m[0]), s)
     return found
 
@@ -54,13 +71,22 @@ def _is_claim(words: list[str], phrase: list[str]) -> bool:
 
 
 def _forbidden_clauses(text: str) -> list[str]:
-    return [clause.strip() for clause in _CLAUSE_BREAK.split(text)
-            if any(_is_claim(normalize_vi(clause).split(), p.split()) for p in FORBIDDEN_PHRASES)]
+    clauses = []
+    for clause in _CLAUSE_BREAK.split(text):
+        words = normalize_vi(clause).split()
+        if any(_is_claim(words, phrase) for phrase in _FORBIDDEN_WORDS):
+            clauses.append(clause.strip())
+    return clauses
 
 
 def check(text: str, *, known_codes: set[str], allowed_amounts: set[int]) -> list[str]:
     """Danh sách lỗi bằng tiếng Việt; rỗng là đạt."""
-    problems = [f"Mã gói không có trong danh mục: {c}" for c in sorted(find_package_codes(text) - known_codes)]
+    # Mã trong [...] luôn bị kiểm; mã không có ngoặc chỉ bị kiểm khi tiền tố là bệnh viện có thật,
+    # để tên xét nghiệm như "HPV-DNA" hay tag "tim-mach" không bị coi là mã gói.
+    hospitals = {c.split("-")[0] for c in known_codes}
+    codes = {c.upper() for c in _BRACKETED_CODE.findall(text)}
+    codes |= {c for c in find_package_codes(text) if c.split("-")[0] in hospitals}
+    problems = [f"Mã gói không có trong danh mục: {c}" for c in sorted(codes - known_codes)]
     problems += [f"Số tiền không khớp giá gói nào: {n}" for n in sorted(find_amounts(text) - allowed_amounts)]
     problems += [f"Câu có dạng chẩn đoán hoặc kê đơn: '{c}'" for c in _forbidden_clauses(text)]
     return problems
