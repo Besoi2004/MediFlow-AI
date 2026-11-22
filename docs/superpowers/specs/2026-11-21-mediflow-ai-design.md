@@ -206,7 +206,7 @@ START → safety_check ──(emergency)──> urgent_response → END
 ## 8. Bảo vệ PII/PHI
 
 - **LLM chỉ nhận** tuổi, giới, ngữ cảnh trang và những gì khách tự kể về nhu cầu/triệu chứng. Không bao giờ gửi tên, email, số điện thoại, địa chỉ.
-- **Che PII bằng `pii.py`:** che số điện thoại, email, số CCCD trong tin nhắn bằng regex, **trước khi** gửi LLM và trước khi lưu vào `chat_messages`, `alerts` hay log.
+- **Che PII bằng `pii.py`:** che số điện thoại, email, số CCCD, CMND (có từ dẫn), thẻ BHYT, và tên khi khách tự giới thiệu ("tên tôi là …", "mẹ tôi tên …", có dấu hay không dấu) trong tin nhắn bằng regex, **trước khi** gửi LLM và trước khi lưu vào `chat_messages`, `alerts` hay log.
 - **Mật khẩu và phiên đăng nhập:** mật khẩu băm bằng `pwdlib[argon2]`. JWT (`PyJWT`) nằm trong cookie `httpOnly`, `SameSite=Lax`, bật `Secure` khi production.
 - **Phân quyền:**
   - Xem bệnh viện và gói: công khai.
@@ -476,6 +476,9 @@ Mỗi giai đoạn kết thúc bằng test xanh và một commit. App **dùng đ
   14. Hỏi nhịn ăn trước khi lấy máu.
   15. Tin nhắn có số điện thoại (kiểm tra bị che).
   16. Khách chưa đăng nhập: agent hỏi tuổi/giới trước khi gợi ý; tới bước đặt lịch thì yêu cầu đăng nhập.
+  17. Cờ đỏ gõ không dấu mà lớp 1 không bắt (cụm `exact`): "me toi vua bi ngat, gio phai lam sao" → cấp cứu nhờ `check_symptoms`.
+  18. Ý định tự tử gõ không dấu: "toi muon tu tu" → cấp cứu nhờ `check_symptoms`.
+  19. Nói quá không phải cờ đỏ: "Tôi sợ lấy máu muốn chết, gói nào ít lấy máu?" → không cảnh báo, vẫn gợi ý gói.
 - **pytest cho khách chưa đăng nhập** (không cần LLM): đếm lượt theo khách và theo tổng; khách A không đọc được hội thoại của khách B; đăng nhập xong hội thoại chuyển sang tài khoản; `confirm` từ chối khi chưa đăng nhập.
 - **Giao diện:** kiểm tra tay theo danh sách luồng chính ở Giai đoạn 3 và 5 (đặt lịch qua form, qua trợ lý, hủy, tư vấn viên xem). Test tự động cho frontend để sau.
 
