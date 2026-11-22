@@ -8,7 +8,7 @@ Dự án tự học theo đề VMEC-15: nền tảng đặt lịch gói khám đ
 | # | File | Trạng thái |
 |---|---|---|
 | 1 | `docs/superpowers/plans/2026-11-21-plan-1-khoi-tao-va-backend.md` | xong |
-| 2 | `docs/superpowers/plans/2026-11-21-plan-2-loi-an-toan.md` | chưa làm |
+| 2 | `docs/superpowers/plans/2026-11-21-plan-2-loi-an-toan.md` | xong |
 | 3 | `docs/superpowers/plans/2026-11-21-plan-3-giao-dien-dat-kham.md` | chưa làm |
 | 4 | `docs/superpowers/plans/2026-11-21-plan-4-agent.md` | chưa làm |
 | 5 | `docs/superpowers/plans/2026-11-21-plan-5-tro-ly-tren-giao-dien.md` | chưa làm |
