@@ -7,7 +7,7 @@ from app.safety.pii import redact
     ("sđt mình 0901234567 nhé", "sđt mình [SĐT] nhé"),
     ("gọi 0901 234 567", "gọi [SĐT]"), ("gọi 0901.234.567", "gọi [SĐT]"),       # Review Focus 3
     ("gọi 0901-234-567", "gọi [SĐT]"), ("số +84 901234567", "số [SĐT]"),
-    ("bàn 02838123456", "bàn [SĐT]"), ("bàn (028) 3812 3456", "bàn [SĐT]"),
+    ("bàn 02838123456", "bàn [SĐT]"), ("bàn (028) 3812 3456", "bàn [SĐT]"), ("gọi (0901234567)", "gọi ([SĐT])"),
     ("mail an.nguyen@gmail.com", "mail [EMAIL]"),
     ("CCCD 001090012345", "CCCD [CCCD]"),
 ])

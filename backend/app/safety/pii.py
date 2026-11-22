@@ -6,9 +6,9 @@ import re
 _PATTERNS = (
     (re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+"), "[EMAIL]"),
     (re.compile(r"(?<!\d)\d{12}(?!\d)"), "[CCCD]"),
-    # 0 hoặc +84/84, rồi 9–10 chữ số; giữa các chữ số được có dấu cách, chấm, gạch; mã vùng được trong ngoặc.
+    # 0 hoặc +84/84, rồi 9–10 chữ số; giữa các chữ số được có dấu cách, chấm, gạch; mã vùng được trong ngoặc "(028)".
     # Hai chữ số đầu sau 0/+84 phải liền nhau, nên ngày "05-12-2026 08:00" không bị nhận nhầm.
-    (re.compile(r"(?<![\d+])(?:(?:\+84|84)[ .-]?|\(?0)\d\d\)?(?:[ .-]?\d){7,8}(?!\d)"), "[SĐT]"),
+    (re.compile(r"(?<![\d+])(?:(?:\+84|84)[ .-]?\d\d|\(0\d\d\)|0\d\d)(?:[ .-]?\d){7,8}(?!\d)"), "[SĐT]"),
 )
 
 

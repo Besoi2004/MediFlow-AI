@@ -25,6 +25,9 @@ def test_normalize_vi(raw, norm):
     ("tôi đang có thai ra máu", "thai_ra_mau"),
     # cụm phải gõ đúng dấu (bỏ dấu thì trùng từ vô hại), gõ đúng dấu vẫn phải bắt
     ("tôi muốn tự tử", "tu_tu"), ("mẹ tôi vừa ngất", "ngat"), ("con tôi sốt cao, cứng cổ", "sot_cung_co"),
+    # có từ phủ định nhưng không phủ định triệu chứng theo sau
+    ("tôi hết sức khó thở", "kho_tho"), ("không chỉ đau ngực mà còn vã mồ hôi", "dau_nguc"),
+    ("không hiểu sao đau ngực quá", "dau_nguc"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)
