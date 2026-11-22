@@ -49,6 +49,7 @@ def test_normalize_vi(raw, norm):
     ("Không ngờ bị đau ngực dữ vậy", "dau_nguc"),
     # dấu phẩy không nối danh sách phủ định khi không có "hay/hoặc/và" khép lại
     ("Tôi không đau ngực, khó thở lắm", "kho_tho"), ("không đau nhưng mà khó thở", "kho_tho"),
+    ("Tôi không đau ngực, khó thở, tôi mệt và lo lắng", "kho_tho"),  # "và" ở xa không khép danh sách
     # "muốn chết" sau từ cảm xúc thật thì vẫn báo
     ("Tôi buồn muốn chết", "tu_tu"), ("đau khổ muốn chết", "tu_tu"), ("tôi mệt mỏi, muốn chết", "tu_tu"),
     # từ nói quá đi cùng dấu hiệu ý định thật thì vẫn báo

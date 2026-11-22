@@ -146,6 +146,14 @@ def _negated(fw: list[str], s: int, g: Grammar) -> bool:
     return False
 
 
+def _list_goes_on(fw: list[str], e: int, starts: set[int], g: Grammar) -> bool:
+    """Ngay sau vị trí e (bỏ qua dấu phẩy) là một triệu chứng khác hoặc "hay/hoặc/và", tức danh sách còn tiếp."""
+    k = e
+    while k < len(fw) and fw[k] == _COMMA:
+        k += 1
+    return k < len(fw) and (fw[k] in g.coordinators or k in starts)
+
+
 def _sentence_words(sentence: str) -> list[str]:
     raw: list[str] = []
     for k, part in enumerate(sentence.split(_COMMA)):
@@ -161,13 +169,15 @@ def detect(text: str) -> list[Hit]:
         raw = _sentence_words(sentence)
         norm = [w if w == _COMMA else normalize_vi(w) for w in raw]
         fw = raw if accented else norm
-        last_coordinator = max((k for k, w in enumerate(fw) if w in g.coordinators), default=-1)
+        spans = sorted((s, e, key) for key, p in _PATTERNS for s, e in _spans(p, raw, norm))
+        starts = {s for s, _, _ in spans}
         negated_ends: set[int] = set()
-        for s, e, key in sorted((s, e, key) for key, p in _PATTERNS for s, e in _spans(p, raw, norm)):
-            # triệu chứng liệt kê sau "hay/hoặc/và" (hoặc sau dấu phẩy trong danh sách khép bằng các từ đó)
+        for s, e, key in spans:
+            # triệu chứng liệt kê sau "hay/hoặc/và", hoặc sau dấu phẩy khi danh sách còn tiếp ngay sau nó,
             # nhận phủ định của triệu chứng ngay trước: "không đau ngực, khó thở hay ngất"
             prev = fw[s - 1] if s > 0 else None
-            listed = s - 1 in negated_ends and (prev in g.coordinators or (prev == _COMMA and last_coordinator > s))
+            listed = s - 1 in negated_ends and (prev in g.coordinators
+                                                or (prev == _COMMA and _list_goes_on(fw, e, starts, g)))
             if listed or _negated(fw, s, g):
                 negated_ends.add(e)
             else:
