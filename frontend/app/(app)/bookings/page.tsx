@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+
+import { PageSkeleton } from "@/components/PageState";
+
+import { BookingsView } from "./_view";
+
+export const metadata: Metadata = { title: "Lịch của tôi · MediFlow" };
+
 export default function Page() {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-semibold">Lịch hẹn của tôi</h1>
-    </main>
+    <Suspense fallback={<PageSkeleton />}>
+      <BookingsView />
+    </Suspense>
   );
 }
