@@ -57,6 +57,10 @@ def test_normalize_vi(raw, norm):
     # từ nói quá chỉ tắt "muốn chết"; "không muốn sống", "tự tử" thì không bao giờ là nói quá
     ("tôi mệt không muốn sống nữa", "tu_tu"), ("mệt quá không muốn sống", "tu_tu"), ("lo quá muốn tự tử", "tu_tu"),
     ("sợ quá nghĩ đến tự tử", "tu_tu"), ("mệt quá muốn tự sát", "tu_tu"),
+    ("tôi không còn muốn sống nữa", "tu_tu"), ("tôi chẳng muốn sống", "tu_tu"), ("tôi chán sống quá", "tu_tu"),
+    ("em không thiết sống nữa", "tu_tu"),
+    # "em" còn là "của tôi": "bố em nói khó" là triệu chứng đột quỵ của bố
+    ("bố em nói khó từ sáng", "dot_quy"), ("em nói khó từ sáng", "dot_quy"),
 ])
 def test_emergency_detected(text, rule):
     hits = detect(text)
