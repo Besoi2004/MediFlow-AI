@@ -39,7 +39,9 @@ rules:
     symptom_code: dot_quy
     phrases: [yếu nửa người, liệt nửa người, tê nửa người, méo miệng, nói ngọng đột ngột, méo mồm]
     exact: [nói khó]
-    except: [bạn nói khó, em nói khó]  # người dùng chê câu trả lời khó hiểu
+    # người dùng chê câu trả lời khó hiểu. Không loại "em nói khó": "em" còn là "của tôi" ("bố em nói khó"),
+    # nên "em nói khó hiểu quá" vẫn bị báo; cố ý chấp nhận báo nhầm để không bỏ sót đột quỵ
+    except: [bạn nói khó]
 
   - id: ngat
     severity: emergency
@@ -71,7 +73,8 @@ rules:
   - id: tu_tu
     severity: emergency
     symptom_code: tu_tu
-    phrases: [tự sát, không muốn sống, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử]
+    phrases: [tự sát, không muốn sống, không còn muốn sống, chẳng muốn sống, chẳng còn muốn sống, chán sống,
+              không thiết sống, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử]
     exact: [tự tử]
     any_of:
       # chỉ "muốn chết" mới hay là nói quá; "mệt không muốn sống", "lo quá muốn tự tử" thì luôn báo
