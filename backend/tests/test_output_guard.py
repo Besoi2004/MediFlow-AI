@@ -44,6 +44,27 @@ def test_code_check_needs_brackets_or_known_hospital():
     assert check("Gói [DELTA-VIP] giá 1.200.000đ", known_codes=CODES, allowed_amounts=PRICES) != []
 
 
+def test_known_codes_any_case():
+    assert check("Gói [ALP-CB01] và alp-cb01", known_codes={"alp-cb01"}, allowed_amounts=set()) == []
+
+
+HOSPITALS = {"Bệnh viện Alpha (mô phỏng)", "ALP", "Bệnh viện Gamma (mô phỏng)", "GAM"}
+
+
+def test_unknown_hospital_flagged():
+    problems = check("Bệnh viện Chợ Rẫy có gói [ALP-CB01]", known_codes=CODES, allowed_amounts=PRICES,
+                     known_hospitals=HOSPITALS)
+    assert any("Chợ Rẫy" in p for p in problems)
+    assert check("bệnh viện tư nhân Tâm Anh rất tốt", known_codes=CODES, allowed_amounts=PRICES,
+                 known_hospitals=HOSPITALS) != []
+
+
+@pytest.mark.parametrize("text", ["Bệnh viện Alpha có gói [ALP-CB01]", "Bệnh viện Đa khoa Alpha (mô phỏng) ở Hà Nội",
+    "Các bệnh viện Hà Nội có nhiều gói", "bệnh viện gần nhà bạn", "BV ALP có gói này", "Bệnh viện Gamma Đà Nẵng"])
+def test_known_hospitals_pass(text):
+    assert check(text, known_codes=CODES, allowed_amounts=PRICES, known_hospitals=HOSPITALS) == []
+
+
 def test_find_codes():
     assert find_package_codes("Gói [ALP-CB01] và alp-tim, xét nghiệm SA-BUNG, KHAM-NOI") == {"ALP-CB01", "ALP-TIM"}
 
@@ -71,7 +92,8 @@ def test_lowercase_code_checked():                                       # Revie
     "Bạn nên dùng thuốc hạ áp mỗi sáng.", "Bạn nên uống Metformin 500mg sau ăn.", "Hãy dùng paracetamol 500mg mỗi 6 giờ.",
     "Bạn nên xét nghiệm thêm PSA.", "Mình khuyên bạn làm thêm xét nghiệm HbA1c ngoài gói.",
     "Bạn cần làm thêm xét nghiệm chức năng tuyến giáp.",
-    "Mình không chắc, nhưng bạn nên uống thuốc hạ áp"])
+    "Mình không chắc, nhưng bạn nên uống thuốc hạ áp",
+    "Bạn nên làm xét nghiệm PSA.", "Bạn nên đi xét nghiệm tầm soát ung thư."])
 def test_forbidden(text):
     assert check(text, known_codes=CODES, allowed_amounts=PRICES) != []
 
@@ -90,7 +112,9 @@ def test_forbidden(text):
     "Khi bạn bị bệnh mạn tính, nên mang theo kết quả cũ.", "Trường hợp bạn bị bệnh tim, hãy báo trước cho bệnh viện.",
     "Nếu bác sĩ đã kê đơn thuốc huyết áp, bạn vẫn uống như bình thường.",
     "Bạn có hay uống thuốc gì thường xuyên không?", "Bạn đang bị bệnh gì không?",
-    "Bạn nên làm xét nghiệm máu vào buổi sáng khi chưa ăn"])  # lời dặn chuẩn bị, không phải đòi thêm xét nghiệm
+    # lời dặn chuẩn bị (có thời điểm), không phải khuyên làm xét nghiệm
+    "Bạn nên làm xét nghiệm máu vào buổi sáng khi chưa ăn", "Bạn nên làm xét nghiệm máu lúc đói",
+    "Bạn cần làm xét nghiệm đường huyết trước 9 giờ sáng", "Bạn không cần làm xét nghiệm thêm"])
 def test_allowed_medical_wording(text):
     assert check(text, known_codes=CODES, allowed_amounts=PRICES) == []
 

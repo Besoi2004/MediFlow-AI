@@ -21,6 +21,8 @@ FORBIDDEN_PHRASES = ("kê đơn", "liều dùng", "chẩn đoán là", "chẩn �
                      "nên uống thuốc", "hãy uống thuốc", "nên dùng thuốc", "hãy dùng thuốc")
 _ADVISE = ("nên", "cần", "hãy", "khuyên bạn", "khuyên")
 _EXTRA_TESTS = ("làm thêm xét nghiệm", "làm xét nghiệm thêm", "xét nghiệm thêm")
+# "nên làm xét nghiệm PSA" là khuyên làm xét nghiệm; có thời điểm theo sau là lời dặn chuẩn bị ("... máu lúc đói")
+_PREP_CONTEXT = ("vào", "lúc", "khi", "sau", "trước", "buổi", "đúng", "trong gói", "theo gói", "của gói")
 # Khẳng định bệnh "bạn (đang/có thể) bị/mắc <bệnh>": bỏ qua nếu 3 từ ngay trước có _MARKERS, và bỏ qua câu hỏi.
 _DISEASES = ("bệnh", "ung thư", "tiểu đường", "đái tháo đường", "cao huyết áp", "tăng huyết áp", "huyết áp cao",
              "mỡ máu", "rối loạn mỡ máu", "gan nhiễm mỡ", "viêm gan", "viêm", "gút", "gout", "suy thận", "sỏi thận",
@@ -35,6 +37,15 @@ _BULLET = re.compile(r"\n[ \t]*(?:[-*•+]|\d+[.)])[ \t]+")  # nối dòng gạc
 
 _PACKAGE_CODE = re.compile(r"(?<![\w-])[A-Za-z]{3}-[A-Za-z0-9]{2,}")
 _BRACKETED_CODE = re.compile(r"\[([A-Za-z]+-[A-Za-z0-9]+)\]")
+
+_HOSPITAL_WORD = re.compile(r"(?i)\b(?:bệnh viện|bv)\b")
+_TOKEN = re.compile(r"[^\W_]+|[^\w\s]")
+# Đã bỏ dấu. Từ mô tả đứng trước tên riêng ("Bệnh viện Đa khoa Alpha") và tỉnh thành ("các bệnh viện Hà Nội").
+_HOSPITAL_DESCRIPTORS = ("dai hoc y duoc", "dai hoc y", "dai hoc", "rang ham mat", "da khoa", "quoc te", "trung uong",
+                         "thanh pho", "chuyen khoa", "tu nhan", "nhi dong", "phu san", "san nhi", "tim mach", "ung buou",
+                         "da lieu", "tinh", "nhi", "mat", "quan", "huyen")
+_CITIES = ("ha noi", "ho chi minh", "tphcm", "hcm", "tp", "sai gon", "da nang", "hai phong", "can tho", "hue",
+           "nha trang")
 
 
 @dataclass(frozen=True)
@@ -53,8 +64,9 @@ def _grammar(accented: bool) -> _Grammar:
     def alt(items: tuple[str, ...]) -> str:
         return "|".join(re.escape(form(x)) for x in sorted(items, key=len, reverse=True))
 
+    test = rf"(?:{alt(_ADVISE)}) (?:(?:{alt(('làm', 'đi'))}) )?{form('xét nghiệm')}\b(?!(?: [^\W_]+){{0,3}} (?:{alt(_PREP_CONTEXT)})\b)"
     return _Grammar(
-        action=re.compile(rf"\b(?:{alt(FORBIDDEN_PHRASES)}|(?:{alt(_ADVISE)}) (?:{alt(_EXTRA_TESTS)}))\b"),
+        action=re.compile(rf"\b(?:{alt(FORBIDDEN_PHRASES)}|(?:{alt(_ADVISE)}) (?:{alt(_EXTRA_TESTS)})|{test})\b"),
         assertion=re.compile(rf"\b{form('bạn')} (?:(?:{alt(_HEDGES)}) )?(?:{alt(('bị', 'mắc'))}) (?:{alt(_DISEASES)})\b"),
         markers=tuple(tuple(form(x).split()) for x in _MARKERS),
         connectors=frozenset(form(x) for x in _CONNECTORS),
@@ -161,14 +173,59 @@ def _forbidden_sentences(text: str) -> list[str]:
     return [s.strip() for s in sentences if s.strip() and _is_forbidden(s, g, accented)]
 
 
-def check(text: str, *, known_codes: set[str], allowed_amounts: set[int]) -> list[str]:
-    """Danh sách lỗi bằng tiếng Việt; rỗng là đạt."""
+def _strip_descriptors(tokens: list[str]) -> list[str]:
+    while d := next((d for d in _HOSPITAL_DESCRIPTORS if tokens[:len(d.split())] == d.split()), None):
+        tokens = tokens[len(d.split()):]
+    return tokens
+
+
+def _hospital_mentions(text: str) -> list[str]:
+    """Tên riêng viết hoa sau "bệnh viện"/"BV", bỏ từ mô tả đứng trước: "Bệnh viện đa khoa Chợ Rẫy" -> "Chợ Rẫy"."""
+    names = []
+    for m in _HOSPITAL_WORD.finditer(text):
+        words = []
+        for t in _TOKEN.finditer(text, m.end()):
+            if not t[0][0].isalnum() or len(words) == 8:  # dấu câu kết thúc tên
+                break
+            words.append(t[0])
+        rest = words[len(words) - len(_strip_descriptors([normalize_vi(w) for w in words])):]
+        name = []
+        for w in rest:
+            if not w[0].isupper():
+                break
+            name.append(w)
+        if name:
+            names.append(" ".join(name))
+    return names
+
+
+def _unknown_hospitals(text: str, known_hospitals: set[str]) -> list[str]:
+    """Bệnh viện nhắc tới mà tên riêng (hoặc mã) không khớp bệnh viện nào; tên tỉnh thành thì bỏ qua."""
+    known = set()
+    for h in known_hospitals:
+        tokens = normalize_vi(h).split()
+        tokens = _strip_descriptors(tokens[2:] if tokens[:2] == ["benh", "vien"] else tokens)
+        known |= set(tokens[:1])
+    unknown = []
+    for name in _hospital_mentions(text):
+        tokens = normalize_vi(name).split()
+        if tokens[0] not in known and not any(tokens[:len(c.split())] == c.split() for c in _CITIES):
+            unknown.append(name)
+    return unknown
+
+
+def check(text: str, *, known_codes: set[str], allowed_amounts: set[int],
+          known_hospitals: set[str] = frozenset()) -> list[str]:
+    """Danh sách lỗi bằng tiếng Việt; rỗng là đạt. known_hospitals: tên và mã bệnh viện; rỗng thì không kiểm."""
+    known = {c.upper() for c in known_codes}
     # Mã trong [...] luôn bị kiểm; mã không có ngoặc chỉ bị kiểm khi tiền tố là bệnh viện có thật,
     # để tên xét nghiệm như "HPV-DNA" hay tag "tim-mach" không bị coi là mã gói.
-    hospitals = {c.split("-")[0] for c in known_codes}
+    prefixes = {c.split("-")[0] for c in known}
     codes = {c.upper() for c in _BRACKETED_CODE.findall(text)}
-    codes |= {c for c in find_package_codes(text) if c.split("-")[0] in hospitals}
-    problems = [f"Mã gói không có trong danh mục: {c}" for c in sorted(codes - known_codes)]
+    codes |= {c for c in find_package_codes(text) if c.split("-")[0] in prefixes}
+    problems = [f"Mã gói không có trong danh mục: {c}" for c in sorted(codes - known)]
+    if known_hospitals:
+        problems += [f"Bệnh viện không có trong danh mục: {h}" for h in _unknown_hospitals(text, known_hospitals)]
     problems += [f"Số tiền không khớp giá gói nào: {n}" for n in sorted(find_amounts(text) - allowed_amounts)]
     problems += [f"Câu có dạng chẩn đoán hoặc kê đơn: '{s}'" for s in _forbidden_sentences(text)]
     return problems

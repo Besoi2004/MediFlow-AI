@@ -5,6 +5,7 @@
 #   exact: cụm mà bỏ dấu sẽ trùng câu vô hại ("tự tử"/"từ từ", "ngất"/"ngạt mũi", "xỉu"/"xíu", "nói khó"/"nỗi khổ"),
 #     nên phải gõ đúng dấu mới bắt. Gõ không dấu thì để lớp 2 (check_symptoms) bắt.
 #   except: cụm vô hại viết có dấu; cụm khớp mà chồng lên cụm này thì bỏ ("nâng ngực" không phải "nặng ngực").
+#   not_after: từ viết có dấu; có trong 3 từ ngay trước cụm khớp (cùng vế câu) thì bỏ ("sợ lấy máu muốn chết").
 #   all_of: các nhóm (mỗi nhóm có phrases / exact / except) cùng có mặt trong một tin nhắn thì báo.
 #
 # Từ chức năng dưới đây: tin nhắn có dấu thì so có dấu ("ợ chua" không phải "chưa"), không dấu thì so bỏ dấu.
@@ -69,9 +70,11 @@ rules:
   - id: tu_tu
     severity: emergency
     symptom_code: tu_tu
-    # shortcut: "muốn chết" bắt cả câu nói quá như "nóng muốn chết"; cố ý chấp nhận để an toàn
     phrases: [tự sát, muốn chết, không muốn sống, ý định tự tử, nghĩ đến tự tử, nghĩ tới tự tử]
     exact: [tự tử]
+    # nói quá: "sợ lấy máu muốn chết", "nóng muốn chết". Không gồm "buồn", "chán", "đau" vì có thể là thật.
+    # shortcut: gõ không dấu thì vẫn báo cả câu nói quá; cố ý chấp nhận để an toàn
+    not_after: [sợ, mệt, đói, khát, nóng, lạnh, lo, mỏi, ngứa, buồn cười, hồi hộp, run, ngại]
 
   - id: thai_ra_mau
     severity: emergency
