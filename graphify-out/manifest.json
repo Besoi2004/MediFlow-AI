@@ -144,10 +144,10 @@
     "semantic_hash": "072399ed353941f0e3ac03244f84ec5a"
   },
   "backend/app/safety/red_flags.py": {
-    "mtime": 1795336854.9466631,
-    "seen": 1795336899.5131316,
-    "ast_hash": "85e160535475cc3ff81fa83855da57ca",
-    "semantic_hash": "85e160535475cc3ff81fa83855da57ca"
+    "mtime": 1795349349.4519796,
+    "seen": 1795349402.4549665,
+    "ast_hash": "fed0c7b7f94b63857bda56d2a0bafd20",
+    "semantic_hash": "fed0c7b7f94b63857bda56d2a0bafd20"
   },
   "backend/app/safety/red_flags.yaml": {
     "mtime": 1795336855.2761805,
@@ -570,10 +570,10 @@
     "semantic_hash": "76b46fd813bea819d6dba708eef675ca"
   },
   "backend/tests/test_red_flags.py": {
-    "mtime": 1795337136.9943562,
-    "seen": 1795337238.4421144,
-    "ast_hash": "50c4826e9094cdb0250fee6e188de170",
-    "semantic_hash": "50c4826e9094cdb0250fee6e188de170"
+    "mtime": 1795349278.5136638,
+    "seen": 1795349402.4550219,
+    "ast_hash": "3177c33ce90ab08454d36f458747c9ba",
+    "semantic_hash": "3177c33ce90ab08454d36f458747c9ba"
   },
   "graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md": {
     "mtime": 1795268998.017531,
