@@ -1,4 +1,5 @@
 import time
+import unicodedata
 from pathlib import Path
 
 import pytest
@@ -29,6 +30,7 @@ from app.safety.red_flags import detect
     # tên viết thường không được nuốt triệu chứng theo sau
     ("tôi tên lan đau ngực", "tôi tên [TÊN] đau ngực"), ("tên tôi là lan khó thở quá", "tên tôi là [TÊN] khó thở quá"),
     ("tôi tên hoa co giật", "tôi tên [TÊN] co giật"),
+    ("tên tôi là Tôn Nữ Thị Hoàng Bảo Anh, 30 tuổi", "tên tôi là [TÊN], 30 tuổi"),  # tên 6 chữ
     ("CMND 012345678", "CMND [CMND]"), ("số chứng minh: 012 345 678", "số chứng minh: [CMND]"),
 ])
 def test_redacts(raw, expected):
@@ -51,7 +53,13 @@ def test_redact_never_hides_red_flags():
         for phrase in rule.get("phrases", []) + rule.get("exact", []):
             text = f"tôi tên lan {phrase}"
             before = {h.rule_id for h in detect(text)}
+            assert rule["id"] in before, text  # câu thử phải thật sự có cờ đỏ, không thì test qua mà chẳng kiểm gì
             assert before <= {h.rule_id for h in detect(redact(text))}, text
+
+
+def test_decomposed_accents_are_redacted():
+    # dấu tách rời (NFD, hay gặp khi gõ trên macOS) không được làm tên bị che dở
+    assert redact(unicodedata.normalize("NFD", "tên tôi là Nguyễn Văn An")) == "tên tôi là [TÊN]"
 
 
 def test_long_text_is_fast():
