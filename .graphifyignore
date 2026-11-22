@@ -1,0 +1,6 @@
+# Không đưa vào đồ thị graphify
+# Bộ kit taste-skill chép nguyên văn (mã của bên thứ ba) và ảnh tĩnh của trang chủ
+frontend/public/assets/
+frontend/public/share.jpg
+# Cấu hình chạy cục bộ và worktree của Claude Code
+.claude/
