@@ -24,6 +24,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Bộ kit của taste-skill, chép nguyên văn (gate cấm sửa)
     "public/assets/**",
+    // Đầu ra của các bộ kiểm tra taste-skill (hồ sơ Chrome, ảnh chụp), đã nằm trong .gitignore
+    ".taste-skill/**",
+    "shots/**",
   ]),
 ]);
 
