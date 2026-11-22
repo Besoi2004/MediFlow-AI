@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import pytest
+import yaml
 
 from app.safety.output_guard import DISCLAIMER, SAFE_FALLBACK, check, find_amounts, find_package_codes
 
@@ -128,6 +131,64 @@ def test_forbidden(text):
     "Bạn cần làm xét nghiệm đường huyết trước 9 giờ sáng", "Bạn không cần làm xét nghiệm thêm"])
 def test_allowed_medical_wording(text):
     assert check(text, known_codes=CODES, allowed_amounts=PRICES) == []
+
+
+def test_restating_customer_condition_is_allowed():
+    # khách tự kể bệnh thì "Vì bạn bị cao huyết áp, ..." là nhắc lại, không phải chẩn đoán
+    kw = {"known_codes": CODES, "allowed_amounts": PRICES}
+    text = "Vì bạn bị cao huyết áp, mình gợi ý gói [GAM-TIM]."
+    assert check(text, **kw) != []
+    assert check(text, **kw, customer_text="toi bi cao huyet ap, nen kham goi nao") == []  # khách gõ không dấu
+    assert check("Bạn cho biết bạn bị tiểu đường, nên chọn gói có đường huyết lúc đói.", **kw,
+                 customer_text="Tôi bị tiểu đường type 2") == []
+    # bệnh khác với bệnh khách kể vẫn là chẩn đoán; "bệnh" chung chung phải khớp cả chữ theo sau
+    assert check("Bạn bị tiểu đường rồi.", **kw, customer_text="tôi bị cao huyết áp") != []
+    assert check("Bạn bị bệnh tim, nên khám gói tim mạch.", **kw, customer_text="tôi muốn khám bệnh") != []
+    assert check("Bạn bị bệnh tim, nên khám gói tim mạch.", **kw, customer_text="tôi bị bệnh tim") == []
+
+
+def _seed_guard_args() -> dict:
+    """Tham số check() như Kế hoạch 4 dựng từ danh mục seed, kèm ngân sách 2 triệu khách đã nói."""
+    data = Path(__file__).parents[1] / "data"
+    packages = yaml.safe_load((data / "packages.yaml").read_text(encoding="utf-8"))
+    hospitals = yaml.safe_load((data / "hospitals.yaml").read_text(encoding="utf-8"))
+    return {"known_codes": {p["code"] for p in packages},
+            "allowed_amounts": {p["price_vnd"] for p in packages} | {2_000_000},
+            "known_hospitals": {h["name"] for h in hospitals} | {h["code"] for h in hospitals}}
+
+
+# Câu trả lời viết theo kiểu Gemini hay viết (markdown, gạch đầu dòng, giờ, ngày), không được bị chặn nhầm
+@pytest.mark.parametrize("text,customer", [
+    (("Với nam 35 tuổi ở Hà Nội, mình gợi ý 2 gói tại **Bệnh viện Alpha (mô phỏng)**:\n\n"
+     "1. **[ALP-CB01] Khám tổng quát cơ bản** – 1.200.000đ: khám nội, xét nghiệm máu, đường huyết lúc đói.\n"
+     "2. **[ALP-TQNAM] Tổng quát nâng cao nam** – 3.500.000đ: thêm siêu âm ổ bụng, X-quang ngực, điện tim.\n\n"
+     "Nếu muốn kiểm tra kỹ hơn, bạn nên chọn gói nâng cao."), ""),
+    (("Trước khi lấy máu, bạn cần nhịn ăn 8–10 tiếng (vẫn được uống nước lọc). Nếu đang dùng thuốc huyết áp hằng "
+     "ngày, hãy hỏi bác sĩ xem có nên uống vào sáng hôm khám không."), ""),
+    (("Gói [GAM-TIM] Tầm soát tim mạch của Bệnh viện Gamma có siêu âm tim và điện tim (ECG). Bạn có thể đặt lịch "
+     "từ Thứ 2 đến Thứ 7, khung giờ 07:00–11:00."), ""),
+    ("Các gói dưới 2 triệu: [GAM-CB01] 990.000đ, [ALP-CB01] 1.200.000đ và [BET-CB01] 1.450.000đ.", "dưới 2 triệu"),
+    ("Mình không thể chẩn đoán qua tin nhắn. Bạn nên đi khám bác sĩ chuyên khoa tim mạch sớm.", ""),
+    (("Mẹ bạn 62 tuổi nên hợp với gói [ALP-CAOTUOI] Khám sức khỏe người cao tuổi (4.800.000đ) hoặc "
+     "[GAM-CAOTUOI] (4.100.000đ) nếu ở Đà Nẵng."), ""),
+    ("Gói nâng cao nữ [BET-TQNU] giá 4,3 triệu, gói nâng cao nam [BET-TQNAM] giá 3,9 triệu.", ""),
+    (("Mình đã ghi nhận: đặt gói [ALP-CB01] ngày 05/12/2026 lúc 08:00 tại Bệnh viện Alpha. Bạn bấm Xác nhận "
+     "để hoàn tất."), ""),
+    ("Gói này có chụp X-quang ngực thẳng. Nếu bạn đang mang thai, hãy báo nhân viên trước khi chụp.", ""),
+    ("Nếu kết quả có chỉ số bất thường, bác sĩ sẽ tư vấn bạn có cần làm thêm xét nghiệm không.", ""),
+    ("Chỉ số đường huyết lúc đói bình thường dưới 100 mg/dL.", ""),
+    ("Vì bạn bị cao huyết áp, mình gợi ý gói [ALP-TIM] Tầm soát tim mạch giá 5.200.000đ.",
+     "Tôi bị cao huyết áp, nên khám gói nào?"),
+])
+def test_realistic_answers_pass(text, customer):
+    assert check(text, **_seed_guard_args(), customer_text=customer) == []
+
+
+@pytest.mark.parametrize("text", ["Bạn bị tiểu đường type 2 rồi, cần điều trị sớm.",
+    "Gói [ALP-VIP] giá 2.990.000đ rất đáng tiền.", "Bệnh viện Chợ Rẫy cũng có gói tương tự.",
+    "Bạn nên uống thuốc hạ áp trước khi đi khám.", "Tổng hai gói là 2.190.000đ."])
+def test_realistic_bad_answers_blocked(text):
+    assert check(text, **_seed_guard_args(), customer_text="Tôi bị cao huyết áp") != []
 
 
 def test_fixed_texts_pass_guard():
