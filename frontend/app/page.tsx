@@ -760,7 +760,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="footer closing footer--dark ground-inverse" id="contact" aria-labelledby="close-h">
+      <footer className="footer closing footer--dark ground-inverse g2m" id="contact" aria-labelledby="close-h">
         <div className="wrap">
           <div className="closing__cta close--type">
             <div className="section-head">

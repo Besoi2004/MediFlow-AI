@@ -79,3 +79,7 @@
 /* máy tính bảng: hỏi đáp xếp chồng cao hơn một màn hình */
 @media (min-width: 640px) and (max-width: 1023px) { #faq { --h: 2; } }
 @media (min-width: 640px) { #pricing .rows__name .muted { display: block; } }
+/* 1024–1279: khung hero thấp hơn, ba dòng gói để khung không cắt ngang chữ */
+@media (min-width: 1024px) and (max-width: 1279px) { .ly-piece--main .d-row:nth-child(n+4) { display: none; } }
+/* lịch trong app-frame lấp đầy cột của nó (fragment.css giới hạn 440px) */
+.app .ui-calendar { max-width: none; }
