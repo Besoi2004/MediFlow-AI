@@ -132,28 +132,28 @@
     "semantic_hash": "78e15e513a4c636fb5142429502447a0"
   },
   "backend/app/safety/output_guard.py": {
-    "mtime": 1795330975.0978634,
-    "seen": 1795331530.7398787,
-    "ast_hash": "3dc8a39179c7cb99949e2ea4b5a8e0f7",
-    "semantic_hash": "3dc8a39179c7cb99949e2ea4b5a8e0f7"
+    "mtime": 1795334773.7494295,
+    "seen": 1795334959.3436434,
+    "ast_hash": "cfae46687c39b24d0b6f9db30f2aacc1",
+    "semantic_hash": "cfae46687c39b24d0b6f9db30f2aacc1"
   },
   "backend/app/safety/pii.py": {
-    "mtime": 1795331229.9576828,
-    "seen": 1795331530.739883,
-    "ast_hash": "99c44ae1a77b32835116dffd86bdfb7a",
-    "semantic_hash": "99c44ae1a77b32835116dffd86bdfb7a"
+    "mtime": 1795334659.4213364,
+    "seen": 1795334959.343647,
+    "ast_hash": "acaa26fcb4c83026d8be40ec707be9d2",
+    "semantic_hash": "acaa26fcb4c83026d8be40ec707be9d2"
   },
   "backend/app/safety/red_flags.py": {
-    "mtime": 1795330673.4046602,
-    "seen": 1795331530.7398858,
-    "ast_hash": "e6efe4a0b6708eac1c95cfb25b83718b",
-    "semantic_hash": "e6efe4a0b6708eac1c95cfb25b83718b"
+    "mtime": 1795334824.7444477,
+    "seen": 1795334959.3436496,
+    "ast_hash": "67a74132d35cae8b68886f3eaeaceb76",
+    "semantic_hash": "67a74132d35cae8b68886f3eaeaceb76"
   },
   "backend/app/safety/red_flags.yaml": {
-    "mtime": 1795330673.2551837,
-    "seen": 1795331530.739888,
-    "ast_hash": "377f5bc66fca61b111146bf50d37352a",
-    "semantic_hash": "377f5bc66fca61b111146bf50d37352a"
+    "mtime": 1795334620.1625023,
+    "seen": 1795334959.3436515,
+    "ast_hash": "5249ecceb166a08d64447f9e2dde375f",
+    "semantic_hash": "5249ecceb166a08d64447f9e2dde375f"
   },
   "backend/app/schemas.py": {
     "mtime": 1795266684.9583127,
@@ -186,10 +186,10 @@
     "semantic_hash": "831bc9e9252f8a954d947a03d9d67fc8"
   },
   "backend/app/textnorm.py": {
-    "mtime": 1795330673.073229,
-    "seen": 1795331530.7399032,
-    "ast_hash": "429cddfe432624d952b72b8491b6b716",
-    "semantic_hash": "429cddfe432624d952b72b8491b6b716"
+    "mtime": 1795334619.9569428,
+    "seen": 1795334959.3447695,
+    "ast_hash": "e3568cae21c91ab4bc4c0c864b32fd83",
+    "semantic_hash": "e3568cae21c91ab4bc4c0c864b32fd83"
   },
   "backend/data/hospitals.yaml": {
     "mtime": 1795266684.9643097,
@@ -495,7 +495,7 @@
     "mtime": 1795268174.264913,
     "seen": 1795268844.550125,
     "ast_hash": "1430cd74a8aba57d0d322e6f9d5c3a5d",
-    "semantic_hash": "1430cd74a8aba57d0d322e6f9d5c3a5d"
+    "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-21-plan-5-tro-ly-tren-giao-dien.md": {
     "mtime": 1795268100.2389476,
@@ -558,22 +558,22 @@
     "semantic_hash": "a2760511c65806022ad20adf74370ff3"
   },
   "backend/tests/test_output_guard.py": {
-    "mtime": 1795330951.3946712,
-    "seen": 1795331530.7399383,
-    "ast_hash": "a52052ccff6a762846f4496c17214a13",
-    "semantic_hash": "a52052ccff6a762846f4496c17214a13"
+    "mtime": 1795334531.4449341,
+    "seen": 1795334959.34736,
+    "ast_hash": "6d4833fc938ebc3e7c7324fd2c6dd3f8",
+    "semantic_hash": "6d4833fc938ebc3e7c7324fd2c6dd3f8"
   },
   "backend/tests/test_pii.py": {
-    "mtime": 1795331211.355373,
-    "seen": 1795331530.7399406,
-    "ast_hash": "85dc7a8ca53c0f2ed0c47fabe1f56d11",
-    "semantic_hash": "85dc7a8ca53c0f2ed0c47fabe1f56d11"
+    "mtime": 1795334530.943474,
+    "seen": 1795334959.347363,
+    "ast_hash": "eaa28a271413ac3e1ef90f601ddd5181",
+    "semantic_hash": "eaa28a271413ac3e1ef90f601ddd5181"
   },
   "backend/tests/test_red_flags.py": {
-    "mtime": 1795330632.8794446,
-    "seen": 1795331530.7399423,
-    "ast_hash": "5b9d02bf1d8ce6fcdcc097b2227e31cf",
-    "semantic_hash": "5b9d02bf1d8ce6fcdcc097b2227e31cf"
+    "mtime": 1795334804.6107416,
+    "seen": 1795334959.3473654,
+    "ast_hash": "802e229aa714304a3a2625011a204432",
+    "semantic_hash": "802e229aa714304a3a2625011a204432"
   },
   "graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md": {
     "mtime": 1795268998.017531,
