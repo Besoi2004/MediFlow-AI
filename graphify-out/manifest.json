@@ -132,28 +132,28 @@
     "semantic_hash": "78e15e513a4c636fb5142429502447a0"
   },
   "backend/app/safety/output_guard.py": {
-    "mtime": 1795266684.9553092,
-    "seen": 1795268844.5500357,
-    "ast_hash": "acacb9769b3ae7d3e78509b5d76c2192",
-    "semantic_hash": "acacb9769b3ae7d3e78509b5d76c2192"
+    "mtime": 1795330975.0978634,
+    "seen": 1795331530.7398787,
+    "ast_hash": "3dc8a39179c7cb99949e2ea4b5a8e0f7",
+    "semantic_hash": "3dc8a39179c7cb99949e2ea4b5a8e0f7"
   },
   "backend/app/safety/pii.py": {
-    "mtime": 1795266684.9563103,
-    "seen": 1795268844.5500371,
-    "ast_hash": "c75cde36a6aafa048a61f25ac61e09aa",
-    "semantic_hash": "c75cde36a6aafa048a61f25ac61e09aa"
+    "mtime": 1795331229.9576828,
+    "seen": 1795331530.739883,
+    "ast_hash": "99c44ae1a77b32835116dffd86bdfb7a",
+    "semantic_hash": "99c44ae1a77b32835116dffd86bdfb7a"
   },
   "backend/app/safety/red_flags.py": {
-    "mtime": 1795266684.95731,
-    "seen": 1795268844.5500386,
-    "ast_hash": "d325ebf9bd0803fac352b1568d8678ae",
-    "semantic_hash": "d325ebf9bd0803fac352b1568d8678ae"
+    "mtime": 1795330673.4046602,
+    "seen": 1795331530.7398858,
+    "ast_hash": "e6efe4a0b6708eac1c95cfb25b83718b",
+    "semantic_hash": "e6efe4a0b6708eac1c95cfb25b83718b"
   },
   "backend/app/safety/red_flags.yaml": {
-    "mtime": 1795266684.95731,
-    "seen": 1795268844.5500398,
-    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
-    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+    "mtime": 1795330673.2551837,
+    "seen": 1795331530.739888,
+    "ast_hash": "377f5bc66fca61b111146bf50d37352a",
+    "semantic_hash": "377f5bc66fca61b111146bf50d37352a"
   },
   "backend/app/schemas.py": {
     "mtime": 1795266684.9583127,
@@ -186,10 +186,10 @@
     "semantic_hash": "831bc9e9252f8a954d947a03d9d67fc8"
   },
   "backend/app/textnorm.py": {
-    "mtime": 1795266684.9633095,
-    "seen": 1795268844.550049,
-    "ast_hash": "467deee23094351736b6a85e3aa3ffca",
-    "semantic_hash": "467deee23094351736b6a85e3aa3ffca"
+    "mtime": 1795330673.073229,
+    "seen": 1795331530.7399032,
+    "ast_hash": "429cddfe432624d952b72b8491b6b716",
+    "semantic_hash": "429cddfe432624d952b72b8491b6b716"
   },
   "backend/data/hospitals.yaml": {
     "mtime": 1795266684.9643097,
@@ -462,10 +462,10 @@
     "semantic_hash": "ab575e944f15d39a5486cf9fca385c5e"
   },
   "CLAUDE.md": {
-    "mtime": 1795267401.73667,
-    "seen": 1795268844.5501168,
-    "ast_hash": "80f068b837a687780796c6129d7cd7d0",
-    "semantic_hash": "80f068b837a687780796c6129d7cd7d0"
+    "mtime": 1795331014.204255,
+    "seen": 1795331530.7399955,
+    "ast_hash": "9ef691b8630b0106b176eb6cec9e820d",
+    "semantic_hash": "9ef691b8630b0106b176eb6cec9e820d"
   },
   "README.md": {
     "mtime": 1795267421.6383312,
@@ -556,5 +556,35 @@
     "seen": 1795268844.5501418,
     "ast_hash": "a2760511c65806022ad20adf74370ff3",
     "semantic_hash": "a2760511c65806022ad20adf74370ff3"
+  },
+  "backend/tests/test_output_guard.py": {
+    "mtime": 1795330951.3946712,
+    "seen": 1795331530.7399383,
+    "ast_hash": "a52052ccff6a762846f4496c17214a13",
+    "semantic_hash": "a52052ccff6a762846f4496c17214a13"
+  },
+  "backend/tests/test_pii.py": {
+    "mtime": 1795331211.355373,
+    "seen": 1795331530.7399406,
+    "ast_hash": "85dc7a8ca53c0f2ed0c47fabe1f56d11",
+    "semantic_hash": "85dc7a8ca53c0f2ed0c47fabe1f56d11"
+  },
+  "backend/tests/test_red_flags.py": {
+    "mtime": 1795330632.8794446,
+    "seen": 1795331530.7399423,
+    "ast_hash": "5b9d02bf1d8ce6fcdcc097b2227e31cf",
+    "semantic_hash": "5b9d02bf1d8ce6fcdcc097b2227e31cf"
+  },
+  "graphify-out/memory/query_20261121_134958_edf6de8f_why_does_package_connect_the_catalog_models_commun.md": {
+    "mtime": 1795268998.017531,
+    "seen": 1795331530.7399967,
+    "ast_hash": "ceb14f0cf8caab9aa7dca0f148bc0eac",
+    "semantic_hash": "ceb14f0cf8caab9aa7dca0f148bc0eac"
+  },
+  "graphify-out/memory/query_20261121_135555_6d5ba0b5_how_does_create_booking_connect_package__timeslot.md": {
+    "mtime": 1795269355.931006,
+    "seen": 1795331530.739998,
+    "ast_hash": "23613c3efe387efa7854707bea0331f0",
+    "semantic_hash": "23613c3efe387efa7854707bea0331f0"
   }
 }
