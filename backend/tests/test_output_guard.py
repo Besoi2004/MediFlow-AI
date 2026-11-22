@@ -62,6 +62,19 @@ def test_unknown_hospital_flagged():
                  known_hospitals=HOSPITALS) != []
 
 
+@pytest.mark.parametrize("text", ["benh vien Cho Ray co goi tuong tu",  # viết không dấu
+    # tên bịa bắt đầu bằng tên tỉnh: chỉ "các bệnh viện Hà Nội" (đúng bằng tên tỉnh) mới là câu nói chung
+    "Bệnh viện Hà Nội Medical có gói rẻ hơn", "Bệnh viện Sài Gòn ITO cũng có gói này"])
+def test_unknown_hospital_variants_flagged(text):
+    assert check(text, known_codes=CODES, allowed_amounts=PRICES, known_hospitals=HOSPITALS) != []
+
+
+def test_known_name_without_hospital_word_drops_descriptors():
+    # danh mục ghi "Đa khoa Alpha", câu trả lời ghi "Bệnh viện Đa khoa Alpha": cùng một bệnh viện
+    assert check("Bệnh viện Đa khoa Alpha có gói [ALP-CB01]", known_codes=CODES, allowed_amounts=PRICES,
+                 known_hospitals={"Đa khoa Alpha"}) == []
+
+
 def test_hospital_names_compared_in_full():
     # tên đăng ký có thể bắt đầu bằng "BV"
     kw = {"known_codes": CODES, "allowed_amounts": PRICES}

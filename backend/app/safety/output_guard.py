@@ -38,7 +38,7 @@ _BULLET = re.compile(r"\n[ \t]*(?:[-*•+]|\d+[.)])[ \t]+")  # nối dòng gạc
 _PACKAGE_CODE = re.compile(r"(?<![\w-])[A-Za-z]{3}-[A-Za-z0-9]{2,}")
 _BRACKETED_CODE = re.compile(r"\[([A-Za-z]+-[A-Za-z0-9]+)\]")
 
-_HOSPITAL_WORD = re.compile(r"(?i)\b(?:bệnh viện|bv)\b")
+_HOSPITAL_WORD = re.compile(r"(?i)\b(?:bệnh viện|benh vien|bv)\b")
 _TOKEN = re.compile(r"[^\W_]+|[^\w\s]")
 # Đã bỏ dấu. Từ mô tả đứng trước tên riêng ("Bệnh viện Đa khoa Alpha") và tỉnh thành ("các bệnh viện Hà Nội").
 _HOSPITAL_DESCRIPTORS = ("dai hoc y duoc", "dai hoc y", "dai hoc", "rang ham mat", "da khoa", "quoc te", "trung uong",
@@ -216,16 +216,19 @@ def _hospital_mentions(text: str) -> list[str]:
 def _unknown_hospitals(text: str, known_hospitals: set[str]) -> list[str]:
     """Bệnh viện nhắc tới mà tên riêng không trùng hẳn tên riêng (hoặc mã) của bệnh viện nào trong danh mục.
 
-    Tên riêng trong danh mục lấy cùng cách với câu trả lời ("BV Alpha", "Bệnh viện Alpha (mô phỏng)" -> "Alpha").
-    So trọn tên: "Bệnh viện Hồng Đức" (trùng chữ đầu với "Hồng Ngọc") hay "Bệnh viện Alpha Quốc Tế" (thêm chữ sau
-    tên thật) đều là bệnh viện lạ. Câu chỉ nói tỉnh thành ("các bệnh viện Hà Nội") thì bỏ qua.
+    Tên riêng trong danh mục lấy cùng cách với câu trả lời ("BV Alpha", "Bệnh viện Alpha (mô phỏng)", "Đa khoa Alpha"
+    -> "Alpha"). So trọn tên: "Bệnh viện Hồng Đức" (trùng chữ đầu với "Hồng Ngọc") hay "Bệnh viện Alpha Quốc Tế"
+    (thêm chữ sau tên thật) đều là bệnh viện lạ. Tên đúng bằng một tỉnh thành ("các bệnh viện Hà Nội") là câu nói
+    chung nên bỏ qua; có thêm chữ ("Bệnh viện Hà Nội Medical") thì vẫn là tên riêng.
+    shortcut: "Bệnh viện Đà Nẵng" (đúng bằng tên tỉnh) cũng bị bỏ qua, vì không phân biệt được với câu nói chung.
     """
-    known = [normalize_vi(n).split() for h in known_hospitals for n in (_hospital_mentions(h) or [h])]
+    known = [_strip_descriptors(normalize_vi(n).split()) for h in known_hospitals
+             for n in (_hospital_mentions(h) or [h])]
     cities = [c.split() for c in _CITIES]
     unknown = []
     for name in _hospital_mentions(text):
         tokens = normalize_vi(name).split()
-        if tokens not in known and not any(tokens[:len(c)] == c for c in cities):
+        if tokens not in known and tokens not in cities:
             unknown.append(name)
     return unknown
 
