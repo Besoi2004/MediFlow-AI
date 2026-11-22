@@ -1,5 +1,6 @@
 """Che số điện thoại, email, CCCD, CMND, tên tự giới thiệu trước khi gửi LLM hoặc lưu (Kế hoạch 2)."""
 import re
+import unicodedata
 
 from app.safety.red_flags import detect
 
@@ -32,10 +33,10 @@ _NOT_NAME = {"gì", "tuổi", "năm", "sinh", "ở", "và", "muốn", "đang", "
 
 
 def _name_end(text: str, pos: int, max_lower: int) -> int:
-    """Hết tên bắt đầu ở pos: các từ viết hoa liền nhau (tối đa 5), hoặc tối đa max_lower từ thường trước một từ
-    không phải tên."""
+    """Hết tên bắt đầu ở pos: các từ viết hoa liền nhau (tối đa 7, như "Tôn Nữ Thị Hoàng Bảo Anh"), hoặc tối đa
+    max_lower từ thường trước một từ không phải tên."""
     end, count, capital = pos, 0, None
-    while count < 5 and (m := _WORD.match(text, end)):
+    while count < 7 and (m := _WORD.match(text, end)):
         word = m[1]
         capital = word[0].isupper() if capital is None else capital
         if (capital and not word[0].isupper()) or (not capital and (word.lower() in _NOT_NAME or count == max_lower)):
@@ -59,6 +60,7 @@ def _flags(text: str) -> set[str]:
 
 
 def redact(text: str) -> str:
+    text = unicodedata.normalize("NFC", text)  # dấu tách rời (NFD) làm regex tên không khớp, tên lọt ra ngoài
     for pattern, label in _PATTERNS:
         text = pattern.sub(label, text)
     # Kế hoạch 4 chạy detect() trên bản đã che, nên che tên không được làm mất cờ đỏ nào:
