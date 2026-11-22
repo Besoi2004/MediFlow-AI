@@ -36,6 +36,13 @@ from app.safety.red_flags import detect
     ("tên của mẹ tôi là Lan", "tên của mẹ tôi là [TÊN]"), ("tên bố là Hùng", "tên bố là [TÊN]"),
     ("mẹ tên là Bình", "mẹ tên là [TÊN]"), ("bố tên Hùng, 60 tuổi", "bố tên [TÊN], 60 tuổi"),
     ("ông nội tên Sáu", "ông nội tên [TÊN]"), ("tên con Minh", "tên con [TÊN]"),
+    # gõ không dấu; tên thường trùng từ chức năng khi bỏ dấu ("nam"/"năm", "thi"/"thì") vẫn phải che
+    ("ten toi la Tran Van Nam, sdt 0987654321", "ten toi la [TÊN], sdt [SĐT]"),
+    ("toi ten lan, muon kham tong quat", "toi ten [TÊN], muon kham tong quat"),
+    ("me minh ten la Binh", "me minh ten la [TÊN]"), ("ten toi la nguyen thi mai", "ten toi la [TÊN]"),
+    ("toi ten nam, 35 tuoi", "toi ten [TÊN], 35 tuoi"), ("toi ten lan dau nguc", "toi ten [TÊN] dau nguc"),
+    # thẻ BHYT: 2 chữ cái và 13 chữ số
+    ("BHYT số DN4010123456789", "BHYT số [BHYT]"), ("the bhyt hs4010123456789 nhe", "the bhyt [BHYT] nhe"),
     ("CMND 012345678", "CMND [CMND]"), ("số chứng minh: 012 345 678", "số chứng minh: [CMND]"),
 ])
 def test_redacts(raw, expected):
@@ -47,7 +54,11 @@ def test_redacts(raw, expected):
     "đặt lịch 05-12-2026 08:00", "ngày 05.12.2026 08:00",  # ngày kèm giờ đủ 9 chữ số sau số 0 đầu
     "ngày 05.12.2026 07.30", "2026-12-05 08:00", "giá 2.000.000 - 3.000.000", "10.000.000.000đ",  # không phải CCCD
     "Gói này tên là gì?", "bạn tên gì vậy", "tên gói là ALP-CB01", "tên tôi là gì nhỉ",
-    "mẹ tên gì cũng được", "bác sĩ tên gì", "tên bố mẹ ghi ở đâu"])
+    "mẹ tên gì cũng được", "bác sĩ tên gì", "tên bố mẹ ghi ở đâu",
+    "ten goi la ALP-CB01", "ban ten gi vay", "ten toi la gi nhi",
+    # số đo, chỉ số, giá, giờ trong tin nhắn thật
+    "huyết áp 140/90", "cao 1m70 nặng 65kg", "đường huyết 7,8 mmol/L", "HbA1c 6.5%", "tiểu cầu 150000",
+    "khoảng 1.500.000 - 2.000.000đ", "lúc 7h30 sáng 5/12", "giờ 08:00-09:00 ngày 2026-12-05"])
 def test_keeps_non_pii(text):
     assert redact(text) == text
 
