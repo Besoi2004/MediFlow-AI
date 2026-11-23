@@ -31,4 +31,19 @@ describe("api", () => {
     await expect(api("/packages")).rejects.toMatchObject({ status: 0, message: "Không kết nối được máy chủ, vui lòng thử lại" });
   });
   it("returns undefined on 204", async () => { reply(204); expect(await api("/auth/logout", { method: "POST" })).toBeUndefined(); });
+  it("rethrows a cancel that lands while the body is read", async () => { // trả null thì useApi xóa dữ liệu cũ, trang nháy skeleton
+    const ac = new AbortController();
+    const body = new ReadableStream({ pull(c) { ac.abort(); c.error(ac.signal.reason); } });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status: 200 })));
+    await expect(api("/packages", { signal: ac.signal })).rejects.toMatchObject({ name: "AbortError" });
+  });
+  it("treats a connection lost while reading the body as unreachable", async () => { // 201 bị cắt body: không phải "Có lỗi xảy ra"
+    const body = new ReadableStream({ pull(c) { c.error(new TypeError("terminated")); } });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status: 201 })));
+    await expect(api("/bookings", { method: "POST", json: {} })).rejects.toMatchObject({ status: 0, message: "Không kết nối được máy chủ, vui lòng thử lại" });
+  });
+  it("fails on a 200 whose body is not JSON", async () => {            // trả null thì trang hiện skeleton mãi
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("<!doctype html><title>Proxy</title>", { status: 200 })));
+    await expect(api("/packages")).rejects.toMatchObject({ status: 200, message: "Có lỗi xảy ra" });
+  });
 });

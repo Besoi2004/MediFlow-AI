@@ -7,6 +7,11 @@ export function safeNext(next: string | null, fallback = "/"): string {
   return next;
 }
 
+// Hết phiên (401): về đăng nhập, xong quay lại đúng trang đang xem kể cả query (?new= của /bookings). Chỉ gọi trên trình duyệt.
+// Đang ở /login (401 trễ của một trang đã rời) thì giữ nguyên, không lồng next=/login?next=...
+export const loginHref = () =>
+  location.pathname === "/login" ? location.pathname + location.search : `/login?next=${encodeURIComponent(location.pathname + location.search)}`;
+
 // Trang tư vấn viên: lỗi máy chủ khi hỏi /auth/me là "thử lại", chưa đăng nhập (401) là "về đăng nhập",
 // không bao giờ báo nhầm "không có quyền" cho một tư vấn viên.
 export function consultantAccess(a: {

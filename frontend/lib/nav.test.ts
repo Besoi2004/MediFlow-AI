@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { consultantAccess, safeNext } from "./nav";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { consultantAccess, loginHref, safeNext } from "./nav";
 
 describe("safeNext", () => {                                           // Review Focus 2
   it("keeps internal paths", () => { expect(safeNext("/bookings")).toBe("/bookings"); expect(safeNext("/book/ALP-CB01?x=1")).toBe("/book/ALP-CB01?x=1"); });
@@ -7,6 +7,20 @@ describe("safeNext", () => {                                           // Review
     for (const bad of [null, "", "https://evil.test", "//evil.test", "/\\evil.test", "/\t/evil.test", "/\n/evil.test", "/\r/evil.test", "bookings"]) expect(safeNext(bad)).toBe("/");
   });
   it("uses the given fallback", () => { expect(safeNext(null, "/consultant")).toBe("/consultant"); });
+});
+
+describe("loginHref", () => {                                          // hết phiên (401): đăng nhập xong về đúng trang đang xem
+  afterEach(() => vi.unstubAllGlobals());
+  it("keeps the current page and its whole query in next", () => {
+    vi.stubGlobal("location", new URL("http://localhost:3000/bookings?new=2"));
+    expect(loginHref()).toBe("/login?next=%2Fbookings%3Fnew%3D2");
+    vi.stubGlobal("location", new URL("http://localhost:3000/consultant?hospital=ALP&date=2026-11-24"));
+    expect(loginHref()).toBe("/login?next=%2Fconsultant%3Fhospital%3DALP%26date%3D2026-11-24");
+  });
+  it("stays on the login page it is already on", () => {               // 401 trễ của trang đã rời: không lồng next=/login?next=...
+    vi.stubGlobal("location", new URL("http://localhost:3000/login?next=%2Fbookings"));
+    expect(loginHref()).toBe("/login?next=%2Fbookings");
+  });
 });
 
 describe("consultantAccess", () => {

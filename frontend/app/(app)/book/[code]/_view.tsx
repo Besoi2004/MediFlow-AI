@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import { BookingSummary } from "@/components/booking/BookingSummary";
 import { SlotPicker } from "@/components/booking/SlotPicker";
@@ -9,6 +9,7 @@ import { Disclaimer } from "@/components/Disclaimer";
 import { ErrorState, PageSkeleton } from "@/components/PageState";
 import { Button } from "@/components/ui/button";
 import { api, ApiError, type Booking, type PackageDetail, type Slot } from "@/lib/api";
+import { loginHref } from "@/lib/nav";
 import { useApi } from "@/lib/useApi";
 
 export function BookView() {
@@ -23,9 +24,20 @@ export function BookView() {
   // Danh sách giờ tải lại (sau 409) mà giờ đang chọn đã hết chỗ thì bỏ chọn
   const chosen = selected && slots.data?.some((s) => s.id === selected.id) ? selected : null;
 
+  // cacheComponents giữ trang đã rời (Activity): đặt xong rồi quay lại thì không kẹt "Đang đặt lịch…" với giờ vừa đặt.
+  // Không trả pending trước router.push: trong lúc chuyển trang vẫn phải khóa để không bấm đặt hai lần.
+  useLayoutEffect(
+    () => () => {
+      setPending(false);
+      setSelected(null);
+      setError(null);
+    },
+    [],
+  );
+
   useEffect(() => {
-    if (pkg.error?.status === 401 || slots.error?.status === 401) router.replace(`/login?next=${encodeURIComponent(`/book/${code}`)}`);
-  }, [pkg.error, slots.error, code, router]);
+    if (pkg.error?.status === 401 || slots.error?.status === 401) router.replace(loginHref());
+  }, [pkg.error, slots.error, router]);
 
   async function confirm() {
     if (!chosen) return;
@@ -36,14 +48,14 @@ export function BookView() {
       router.push(`/bookings?new=${b.id}`);
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError(0, "Có lỗi xảy ra");
-      if (err.status === 401) return router.replace(`/login?next=${encodeURIComponent(`/book/${code}`)}`); // Review Focus 2
+      setPending(false); // cả khi về đăng nhập: trang được giữ lại, quay về không kẹt "Đang đặt lịch…"
+      if (err.status === 401) return router.replace(loginHref()); // Review Focus 2
       if (err.status === 403) setError("Tài khoản tư vấn viên không đặt lịch được");
       else setError(err.message);
       if (err.status === 409) {
         setSelected(null); // Review Focus 3: giờ vừa bị người khác lấy hết chỗ
         slots.retry();
       }
-      setPending(false);
     }
   }
 
@@ -71,6 +83,7 @@ export function BookView() {
             <SlotPicker
               slots={slots.data}
               selectedId={chosen?.id}
+              disabled={pending}
               onSelect={(s) => {
                 setSelected(s);
                 setError(null);

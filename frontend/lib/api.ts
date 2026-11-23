@@ -31,7 +31,11 @@ export async function api<T>(
     throw new ApiError(0, UNREACHABLE);
   }
   if (res.status === 204) return undefined as T;
-  const body = await res.json().catch(() => null);
+  const body = await res.json().catch((e) => {
+    if (opts.signal?.aborted) throw e; // bị hủy giữa lúc đọc body: báo hủy như lúc fetch, không trả null
+    if (!(e instanceof SyntaxError)) throw new ApiError(0, UNREACHABLE); // mất kết nối giữa lúc đọc body
+    return null; // không phải JSON
+  });
   if (!res.ok) {
     const errors: { field: string; message: string }[] = body?.errors ?? [];
     // Backend tắt thì rewrites của Next trả 500 dạng chữ, không phải lỗi mạng
@@ -39,6 +43,7 @@ export async function api<T>(
     const detail = typeof body?.detail === "string" ? body.detail : fallback;
     throw new ApiError(res.status, detail, Object.fromEntries(errors.map((e) => [e.field, e.message])));
   }
+  if (body === null) throw new ApiError(res.status, "Có lỗi xảy ra"); // 2xx không phải JSON (không API nào trả null)
   return body as T;
 }
 

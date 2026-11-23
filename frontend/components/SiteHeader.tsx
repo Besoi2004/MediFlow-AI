@@ -7,10 +7,14 @@ import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ApiError } from "@/lib/api";
 
 export function SiteHeader() {
   const { user, loading, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  // header nằm trong layout, không unmount khi đổi trang: lỗi đăng xuất có nút đóng
+  // (usePathname ở đây làm cả layout thành động, next build chặn prerender)
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const links = [
     { href: "/hospitals", label: "Bệnh viện" },
@@ -21,7 +25,12 @@ export function SiteHeader() {
 
   async function onLogout() {
     setOpen(false);
-    await logout();
+    setLogoutError(null);
+    try {
+      await logout();
+    } catch (e) {
+      return setLogoutError(`Chưa đăng xuất được. ${e instanceof ApiError ? e.message : "Có lỗi xảy ra"}`);
+    }
     window.location.reload(); // trang cần đăng nhập sẽ được proxy chuyển về /login
   }
 
@@ -74,6 +83,16 @@ export function SiteHeader() {
           </SheetContent>
         </Sheet>
       </div>
+      {logoutError && (
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 pb-3">
+          <p role="alert" className="text-base text-destructive">
+            {logoutError}
+          </p>
+          <Button variant="ghost" size="sm" onClick={() => setLogoutError(null)}>
+            Đóng
+          </Button>
+        </div>
+      )}
     </header>
   );
 }
