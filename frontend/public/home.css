@@ -68,17 +68,55 @@
 }
 /* điện thoại: mỗi section đúng 1 hoặc 2 màn hình (layout-v4.md §2) */
 @media (max-width: 639px) {
-  #pricing .frame, #pricing .rows__name .muted { display: none; }
-  #pricing .rows__name { display: flex; align-items: center; min-height: 44px; }
+  #pricing .frame { display: none; }
   #benh-vien .panel { --p-h: 324px; }
   #cach-dat .mo-pc__visual > .ui { min-height: 340px; }
   /* moment.css để section chỉ cao 1 màn hình khi đứng yên (điện thoại); giữ đúng --h: 2 của nó */
   #cach-dat { min-height: calc(2 * 100lvh); }
   #faq .frame--split { --ratio: 170%; }
 }
-/* máy tính bảng: hỏi đáp xếp chồng cao hơn một màn hình */
-@media (min-width: 640px) and (max-width: 1023px) { #faq { --h: 2; } }
-@media (min-width: 640px) { #pricing .rows__name .muted { display: block; } }
+/* máy tính bảng (768x1024, 820x1180): mỗi section đúng 1 hoặc 2 màn hình và lấp gần kín chúng (layout-v4.md §2:
+   nội dung xếp chồng tối đa 832px ở 768x1024; bộ kiểm tra so khoảng trống giữa các section với nhau) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* bảng giá: danh sách bên trái (bỏ dòng phụ như điện thoại), khung trang chi tiết gói bên phải, cả hai cao kín màn hình */
+  #pricing > .wrap > .grid { flex: 1 1 auto; }
+  #pricing .rows { grid-column: 1 / span 6; display: flex; flex-direction: column; }
+  #pricing .rows > li { flex: 1 1 auto; align-items: start; }
+  #pricing .rows__name { align-items: flex-start; }
+  #pricing .frame { grid-column: 7 / span 6; --ratio: 0px; }
+  #pricing .mf-win { align-content: start; }
+  /* hỏi đáp hai màn hình: màn đầu tiêu đề và khung minh họa cao kín, màn sau các câu hỏi (như .g2) */
+  #faq { --h: 2; }
+  #faq > .wrap > .grid { row-gap: calc(var(--padt) + var(--padb)); }
+  #faq .section-head { display: flex; flex-direction: column; height: calc(100svh - var(--padt) - var(--padb)); margin-bottom: 0; }
+  #faq .section-head > .frame { flex: 1 1 0; min-height: 0; --ratio: 0px; }
+  #faq .faq { min-height: calc(100svh - 300px); display: flex; flex-direction: column; justify-content: space-between; }
+  /* bệnh viện: hai thẻ một hàng rồi thẻ thứ ba cả hàng, panel theo chiều cao màn hình (212px ở 768x1024, 290px ở 820x1180) */
+  #benh-vien .card:nth-child(-n+2) { grid-column: auto / span 6; }
+  #benh-vien .card--row > p { min-height: 2lh; }
+  #benh-vien .panel { --p-h: max(200px, calc((100svh - 600px) / 2)); }
+  #benh-vien .stage { --fade-h: 40px; }
+  /* so sánh: bảng cao hơn để khung không trống nửa dưới */
+  #so-sanh .mf-table :is(th, td) { padding-block: 16px; }
+  /* 3 bước khi đứng yên: khung minh họa gọn, bỏ nút và gói thứ hai */
+  #cach-dat .mf-win { padding: 16px; gap: 10px; }
+  #cach-dat .mf-pkg { padding: 8px 0; }
+  #cach-dat .mf-pkg ~ .mf-pkg, #cach-dat .mf-win > .ui-btn { display: none; }
+  /* app-frame: danh sách lấy phần còn lại, lịch cao vừa cả tháng, ngày bên trái và ngày còn chỗ bên phải
+     (khối nền riêng rộng gần hết section thì bộ kiểm tra coi là "band") */
+  .app.ui { grid-template-rows: minmax(0, 1fr) auto; }
+  .app > .app__pane--list { max-height: none; }
+  .app > .app__pane--list::after { display: block; }
+  .app .ui-calendar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto 1fr; }
+  .app .ui-cal__head { grid-column: 1 / -1; }
+  .app :is(.ui-cal__dow, .ui-cal__days) { grid-column: 1; }
+  .app .ui-cal__events { grid-column: 2; grid-row: 2 / 4; align-content: start; border-top: 0; border-left: 1px solid var(--u-line); }
+}
+@media (min-width: 1024px) { #pricing .rows__name .muted { display: block; } }
+@media (max-width: 1023px) {
+  #pricing .rows__name .muted { display: none; }
+  #pricing .rows__name { display: flex; align-items: center; min-height: 44px; }
+}
 /* 1024–1279: khung hero thấp hơn, ba dòng gói để khung không cắt ngang chữ */
 @media (min-width: 1024px) and (max-width: 1279px) { .ly-piece--main .d-row:nth-child(n+4) { display: none; } }
 /* lịch trong app-frame lấp đầy cột của nó (fragment.css giới hạn 440px) */

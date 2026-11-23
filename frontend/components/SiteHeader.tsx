@@ -2,7 +2,6 @@
 
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -13,9 +12,9 @@ import { ApiError } from "@/lib/api";
 export function SiteHeader() {
   const { user, loading, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  // lỗi đăng xuất gắn với trang lúc bấm: sang trang khác thì thôi hiện (header nằm trong layout, không unmount)
-  const [logoutError, setLogoutError] = useState<{ path: string; message: string } | null>(null);
+  // header nằm trong layout, không unmount khi đổi trang: lỗi đăng xuất có nút đóng
+  // (usePathname ở đây làm cả layout thành động, next build chặn prerender)
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const links = [
     { href: "/hospitals", label: "Bệnh viện" },
@@ -30,7 +29,7 @@ export function SiteHeader() {
     try {
       await logout();
     } catch (e) {
-      return setLogoutError({ path: pathname, message: `Chưa đăng xuất được. ${e instanceof ApiError ? e.message : "Có lỗi xảy ra"}` });
+      return setLogoutError(`Chưa đăng xuất được. ${e instanceof ApiError ? e.message : "Có lỗi xảy ra"}`);
     }
     window.location.reload(); // trang cần đăng nhập sẽ được proxy chuyển về /login
   }
@@ -84,10 +83,15 @@ export function SiteHeader() {
           </SheetContent>
         </Sheet>
       </div>
-      {logoutError?.path === pathname && (
-        <p role="alert" className="mx-auto w-full max-w-6xl px-4 pb-3 text-base text-destructive">
-          {logoutError.message}
-        </p>
+      {logoutError && (
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 pb-3">
+          <p role="alert" className="text-base text-destructive">
+            {logoutError}
+          </p>
+          <Button variant="ghost" size="sm" onClick={() => setLogoutError(null)}>
+            Đóng
+          </Button>
+        </div>
       )}
     </header>
   );
