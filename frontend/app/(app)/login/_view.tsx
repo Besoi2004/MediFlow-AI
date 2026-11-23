@@ -16,12 +16,15 @@ export function LoginView() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const done = useRef(false);
 
-  // cacheComponents giữ trang đã rời (Activity): quay lại /login (401 sau khi đã đăng nhập) thì form phải mới,
-  // không kẹt "Đang đăng nhập…" với mật khẩu cũ. Cleanup chạy khi trang bị ẩn.
+  // cacheComponents giữ trang đã rời (Activity): đăng nhập xong mà quay lại /login (401) thì form phải mới, không kẹt
+  // "Đang đăng nhập…" với mật khẩu cũ. Cleanup chạy khi trang bị ẩn; chưa gửi xong thì giữ chữ đang gõ dở.
   useLayoutEffect(() => {
     const form = formRef.current;
     return () => {
+      if (!done.current) return;
+      done.current = false;
       form?.reset();
       setPending(false);
       setError(null);
@@ -40,6 +43,7 @@ export function LoginView() {
         method: "POST",
         json: { email: form.get("email") || undefined, password: form.get("password") || undefined },
       });
+      done.current = true;
       await finish(user);
     } catch (err) {
       const e = err instanceof ApiError ? err : new ApiError(0, "Có lỗi xảy ra");

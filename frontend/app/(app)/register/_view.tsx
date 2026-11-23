@@ -20,11 +20,15 @@ export function RegisterView() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const done = useRef(false);
 
-  // cacheComponents giữ trang đã rời (Activity): quay lại form thì form phải mới, không kẹt "Đang đăng ký…"
+  // cacheComponents giữ trang đã rời (Activity): đăng ký xong mà quay lại thì form phải mới, không kẹt "Đang đăng ký…";
+  // chưa gửi xong thì giữ chữ đang điền dở
   useLayoutEffect(() => {
     const form = formRef.current;
     return () => {
+      if (!done.current) return;
+      done.current = false;
       form?.reset();
       setPending(false);
       setError(null);
@@ -42,6 +46,7 @@ export function RegisterView() {
       // Ô trống gửi đi là thiếu (backend báo "Bắt buộc"), không phải chuỗi rỗng
       const json = Object.fromEntries(FIELDS.map((f) => [f, form.get(f) || undefined]));
       const user = await api<User>("/auth/register", { method: "POST", json });
+      done.current = true;
       await finish(user);
     } catch (err) {
       const e = err instanceof ApiError ? err : new ApiError(0, "Có lỗi xảy ra");

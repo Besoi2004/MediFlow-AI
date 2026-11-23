@@ -17,6 +17,10 @@ describe("loginHref", () => {                                          // hết 
     vi.stubGlobal("location", new URL("http://localhost:3000/consultant?hospital=ALP&date=2026-11-24"));
     expect(loginHref()).toBe("/login?next=%2Fconsultant%3Fhospital%3DALP%26date%3D2026-11-24");
   });
+  it("stays on the login page it is already on", () => {               // 401 trễ của trang đã rời: không lồng next=/login?next=...
+    vi.stubGlobal("location", new URL("http://localhost:3000/login?next=%2Fbookings"));
+    expect(loginHref()).toBe("/login?next=%2Fbookings");
+  });
 });
 
 describe("consultantAccess", () => {

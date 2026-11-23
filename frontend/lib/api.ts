@@ -33,6 +33,7 @@ export async function api<T>(
   if (res.status === 204) return undefined as T;
   const body = await res.json().catch((e) => {
     if (opts.signal?.aborted) throw e; // bị hủy giữa lúc đọc body: báo hủy như lúc fetch, không trả null
+    if (!(e instanceof SyntaxError)) throw new ApiError(0, UNREACHABLE); // mất kết nối giữa lúc đọc body
     return null; // không phải JSON
   });
   if (!res.ok) {

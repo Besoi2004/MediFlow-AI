@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import { BookingSummary } from "@/components/booking/BookingSummary";
 import { SlotPicker } from "@/components/booking/SlotPicker";
@@ -23,6 +23,17 @@ export function BookView() {
 
   // Danh sách giờ tải lại (sau 409) mà giờ đang chọn đã hết chỗ thì bỏ chọn
   const chosen = selected && slots.data?.some((s) => s.id === selected.id) ? selected : null;
+
+  // cacheComponents giữ trang đã rời (Activity): đặt xong rồi quay lại thì không kẹt "Đang đặt lịch…" với giờ vừa đặt.
+  // Không trả pending trước router.push: trong lúc chuyển trang vẫn phải khóa để không bấm đặt hai lần.
+  useLayoutEffect(
+    () => () => {
+      setPending(false);
+      setSelected(null);
+      setError(null);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (pkg.error?.status === 401 || slots.error?.status === 401) router.replace(loginHref());
