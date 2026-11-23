@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import { Field, invalid, useFinishAuth } from "@/components/auth/AuthForm";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,18 @@ export function RegisterView() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // cacheComponents giữ trang đã rời (Activity): quay lại form thì form phải mới, không kẹt "Đang đăng ký…"
+  useLayoutEffect(() => {
+    const form = formRef.current;
+    return () => {
+      form?.reset();
+      setPending(false);
+      setError(null);
+      setFieldErrors({});
+    };
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,7 +55,7 @@ export function RegisterView() {
   return (
     <div className="mx-auto max-w-md py-6">
       <h1 className="font-heading text-3xl font-medium tracking-tight">Đăng ký</h1>
-      <form onSubmit={onSubmit} noValidate className="mt-6 grid gap-4 rounded-2xl border bg-card p-6">
+      <form ref={formRef} onSubmit={onSubmit} noValidate className="mt-6 grid gap-4 rounded-2xl border bg-card p-6">
         <Field id="full_name" label="Họ tên" error={fieldErrors.full_name}>
           <Input id="full_name" name="full_name" autoComplete="name" required {...invalid("full_name", fieldErrors.full_name)} />
         </Field>

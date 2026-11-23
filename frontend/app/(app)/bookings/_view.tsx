@@ -10,6 +10,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { api, ApiError, type Booking } from "@/lib/api";
 import { formatDateTimeVN, orderBookings } from "@/lib/format";
+import { loginHref } from "@/lib/nav";
 import { useApi } from "@/lib/useApi";
 
 export function BookingsView() {
@@ -21,7 +22,7 @@ export function BookingsView() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    if (error?.status === 401) router.replace(`/login?next=${encodeURIComponent("/bookings")}`); // Review Focus 2
+    if (error?.status === 401) router.replace(loginHref()); // Review Focus 2
   }, [error, router]);
 
   async function cancel() {
@@ -34,7 +35,10 @@ export function BookingsView() {
       setTarget(null);
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError(0, "Có lỗi xảy ra");
-      if (err.status === 401) return router.replace(`/login?next=${encodeURIComponent("/bookings")}`);
+      if (err.status === 401) {
+        setTarget(null); // trang được giữ lại khi về đăng nhập: quay về không còn hộp hủy đang mở
+        return router.replace(loginHref());
+      }
       setCancelError(err.message); // 400 "Khung giờ đã qua", 409 đã hủy trước đó
     } finally {
       setPending(false);

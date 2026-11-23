@@ -7,10 +7,12 @@ import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ApiError } from "@/lib/api";
 
 export function SiteHeader() {
   const { user, loading, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const links = [
     { href: "/hospitals", label: "Bệnh viện" },
@@ -21,7 +23,12 @@ export function SiteHeader() {
 
   async function onLogout() {
     setOpen(false);
-    await logout();
+    setLogoutError(null);
+    try {
+      await logout();
+    } catch (e) {
+      return setLogoutError(`Chưa đăng xuất được. ${e instanceof ApiError ? e.message : "Có lỗi xảy ra"}`);
+    }
     window.location.reload(); // trang cần đăng nhập sẽ được proxy chuyển về /login
   }
 
@@ -74,6 +81,11 @@ export function SiteHeader() {
           </SheetContent>
         </Sheet>
       </div>
+      {logoutError && (
+        <p role="alert" className="mx-auto w-full max-w-6xl px-4 pb-3 text-base text-destructive">
+          {logoutError}
+        </p>
+      )}
     </header>
   );
 }

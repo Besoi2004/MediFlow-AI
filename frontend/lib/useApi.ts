@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 import { api, ApiError } from "@/lib/api";
 
@@ -21,6 +21,10 @@ export function useApi<T>(path: string | null) {
     );
     return () => ac.abort();
   }, [path, key]);
+
+  // cacheComponents giữ trang đã rời (Activity): hiện lại thì tải lại, không dùng kết quả cũ. Một 401 cũ còn giữ
+  // sẽ đẩy trang về /login lần nữa ngay sau khi đăng nhập lại. Cleanup chạy khi trang bị ẩn.
+  useLayoutEffect(() => () => setAttempt((a) => a + 1), []);
 
   const retry = useCallback(() => setAttempt((a) => a + 1), []);
   const mutate = useCallback((data: T) => setState({ key, data }), [key]);

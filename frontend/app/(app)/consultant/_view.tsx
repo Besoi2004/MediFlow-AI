@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { invalid } from "@/components/auth/AuthForm";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { EmptyState, ErrorState, PageSkeleton } from "@/components/PageState";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api, ApiError, type ConsultantBooking, type Hospital } from "@/lib/api";
 import { formatDateTimeVN, formatVnd } from "@/lib/format";
-import { consultantAccess } from "@/lib/nav";
+import { consultantAccess, loginHref } from "@/lib/nav";
 import { useApi } from "@/lib/useApi";
 
 const STATUS_ITEMS = { all: "Tất cả", booked: "Đã đặt", cancelled: "Đã hủy" };
@@ -35,8 +36,8 @@ export function ConsultantView() {
 
   useEffect(() => {
     // Review Focus 2: phiên hết hạn hoặc bị từ chối (cookie còn nhưng /auth/me trả 401)
-    if (access === "login" || bookings.error?.status === 401) router.replace(`/login?next=${encodeURIComponent(pathname + (qs ? `?${qs}` : ""))}`);
-  }, [access, bookings.error, router, pathname, qs]);
+    if (access === "login" || bookings.error?.status === 401) router.replace(loginHref());
+  }, [access, bookings.error, router]);
 
   function setParam(key: string, value: string | null) {
     const next = new URLSearchParams(params.toString());
@@ -54,7 +55,12 @@ export function ConsultantView() {
       bookings.mutate(bookings.data.map((b) => (b.id === updated.id ? updated : b)));
       setTarget(null);
     } catch (e) {
-      setCancelError(e instanceof ApiError ? e.message : "Có lỗi xảy ra");
+      const err = e instanceof ApiError ? e : new ApiError(0, "Có lỗi xảy ra");
+      if (err.status === 401) {
+        setTarget(null); // trang được giữ lại khi về đăng nhập: quay về không còn hộp hủy đang mở
+        return router.replace(loginHref());
+      }
+      setCancelError(err.message);
     } finally {
       setPending(false);
     }
@@ -66,6 +72,8 @@ export function ConsultantView() {
 
   const hospitalItems = { all: "Tất cả", ...Object.fromEntries((hospitals.data ?? []).map((h) => [h.code, h.name])) };
   const e = bookings.error;
+  // 422 khi ngày lọc quá xa: lỗi hiện ngay dưới ô ngày, bảng không hiện dữ liệu của bộ lọc cũ
+  const dateError = e?.status === 422 ? e.fieldErrors.date : undefined;
 
   return (
     <div className="space-y-6">
@@ -99,7 +107,18 @@ export function ConsultantView() {
                 Ngày khám
               </label>
               {/* không điều khiển: router.replace chạy như transition, ô ngày điều khiển bị trả về giá trị cũ khi đang gõ */}
-              <Input id="c-date" type="date" defaultValue={params.get("date") ?? ""} onChange={(ev) => setParam("date", ev.currentTarget.value || null)} />
+              <Input
+                id="c-date"
+                type="date"
+                defaultValue={params.get("date") ?? ""}
+                onChange={(ev) => setParam("date", ev.currentTarget.value || null)}
+                {...invalid("c-date", dateError)}
+              />
+              {dateError && (
+                <p id="c-date-error" role="alert" className="text-sm text-destructive">
+                  {dateError}
+                </p>
+              )}
             </div>
             <div className="grid gap-1.5">
               <label htmlFor="c-status" className="text-sm font-medium">
@@ -120,9 +139,8 @@ export function ConsultantView() {
             </div>
           </div>
 
-          {e && e.status !== 401 ? (
-            // 422 khi ngày lọc quá xa: hiện đúng lỗi của ô ngày
-            <ErrorState message={e.fieldErrors.date ?? e.message} onRetry={e.status === 422 ? undefined : bookings.retry} />
+          {dateError ? null : e && e.status !== 401 ? (
+            <ErrorState message={e.message} onRetry={e.status === 422 ? undefined : bookings.retry} />
           ) : !bookings.data ? (
             <PageSkeleton />
           ) : bookings.data.length === 0 ? (

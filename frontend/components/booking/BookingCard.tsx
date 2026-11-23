@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { PrepChecklist } from "@/components/booking/PrepChecklist";
@@ -7,9 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api, ApiError, type Booking, type ChecklistItem } from "@/lib/api";
 import { formatDateTimeVN, formatVnd } from "@/lib/format";
+import { loginHref } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 export function BookingCard({ booking, onCancel, highlight }: { booking: Booking; onCancel?: () => void; highlight?: boolean }) {
+  const router = useRouter();
   const [prep, setPrep] = useState<{ open: boolean; items?: ChecklistItem[]; error?: string }>({ open: false });
   const cancelled = booking.status === "cancelled";
 
@@ -21,6 +24,10 @@ export function BookingCard({ booking, onCancel, highlight }: { booking: Booking
       const items = await api<ChecklistItem[]>(`/bookings/${booking.id}/checklist`);
       setPrep({ open: true, items });
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        setPrep({ open: false }); // trang được giữ lại khi về đăng nhập: không kẹt "Đang tải…"
+        return router.replace(loginHref());
+      }
       setPrep({ open: true, error: e instanceof ApiError ? e.message : "Có lỗi xảy ra" });
     }
   }

@@ -25,6 +25,7 @@ uv run uvicorn app.main:app --reload   # http://localhost:8000/docs
 
 # 3. Frontend (terminal khác)
 cd frontend
+copy .env.example .env.local   # BACKEND_URL trỏ tới backend ở bước 2
 npm install
 npm run dev                            # http://localhost:3000
 ```
